@@ -33,8 +33,7 @@ I am now studying as a junior student in [College of Engineering](https://www.co
 - *2020.09 - 2023.07*, High School Student, Haining High School, Zhejiang. 
 
 # 💻 Experiences
-- *2025.06 - now*, PKU Combustion Lab, Undergraduate Research Project.
-  Supervisor：[Prof. Zheng Chen](http://www2.coe.pku.edu.cn/subpaget.asp?id=210)
+- *2025.06 - now*, PKU Combustion Lab, Undergraduate Research Project.    Supervisor：[Prof. Zheng Chen](http://www2.coe.pku.edu.cn/subpaget.asp?id=210)
 
 # 📝 Publications 
 - Empty up till now.
