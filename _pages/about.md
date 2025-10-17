@@ -17,7 +17,7 @@ redirect_from:
 
 <span class='anchor' id='about-me'></span>
 
-I am now studying as a junior student in [College of Engineering](https://www.coe.pku.edu.cn), [Peking University](https://www.pku.edu.cn), majoring in Aerospace Engineering. My research interest includes combustion, flame and neural networks, aiming to provide brand-new paradigm for engine design, especially in the reconstructions of flow field in Scramjet and Oblique Detonation Engine (ODE).
+I am now studying as a junior student in [College of Engineering](https://www.coe.pku.edu.cn), [Peking University](https://www.pku.edu.cn), majoring in Aerospace Engineering. My research interest includes combustion, flame and neural networks, aiming to provide brand-new paradigm for engine design, especially in the reconstructions of flow field in Scramjet, Oblique Detonation Engine (ODE) and Rotating Detonation Engine (RDE).
 
 >|谁终将声震人间，必长久深自缄默；谁终将亮如闪电，必长久如云漂泊。————尼采
 
@@ -26,6 +26,7 @@ I am now studying as a junior student in [College of Engineering](https://www.co
 - Education Mail: [wsu0605@stu.pku.edu.cn](mailto:wsu0605@stu.pku.edu.cn)
 
 # 🔥 News
+- *2025.09*: &nbsp;🎉🎉 Receiving National Scholarship.
 - *2023.09*: &nbsp;🎉🎉 Entering College of Engineering, Peking University for further study. 
 
 # 📖 Educations
@@ -40,5 +41,6 @@ I am now studying as a junior student in [College of Engineering](https://www.co
 - To Be Continued.
 
 # 🎖 Honors and Awards
-- Empty up till now.
-- To Be Continued.
+- *2025.09*: Undergraduate National Scholarship and Merit Student.
+- *2024.12*: First Prize in Beijing College Student Mathematics Competition.
+- *2025.10*: Second Prize in the Beijing Division of the National College Student Mathematical Modeling Competition.
