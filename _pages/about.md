@@ -44,4 +44,4 @@ I am now studying as a junior student in [College of Engineering](https://www.co
 - *2025.10*: Second Prize in the Beijing Division of the National College Student Mathematical Modeling Competition.
 - *2025.09*: Undergraduate National Scholarship and Merit Student.
 - *2024.12*: First Prize in Beijing College Student Mathematics Competition.
-- *2024.09*: Peking University 3rd Scholarship and Award of Excellent Learning.
+- *2024.09*: Peking University 3rd Scholarship and Outstanding Learning Award.
