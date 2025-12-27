@@ -118,6 +118,20 @@
   }
 }
 
+.cv-embed {
+  min-height: calc(100vh - 6rem);
+
+  iframe {
+    border: 0;
+    display: block;
+    min-height: inherit;
+  }
+}
+
+.cv-embed__fallback {
+  margin-top: 0.5rem;
+}
+
 .page__hero {
   position: relative;
   margin-bottom: 2em;
