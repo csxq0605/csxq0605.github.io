@@ -17,7 +17,7 @@ redirect_from:
 
 <span class='anchor' id='about-me'></span>
 
-I am now studying as a junior student in [College of Engineering](https://www.coe.pku.edu.cn), [Peking University](https://www.pku.edu.cn), majoring in Aerospace Engineering. My research interest includes combustion, flame and neural networks, aiming to provide brand-new paradigm for engine design, especially in the reconstructions of flow field in Scramjet, Oblique Detonation Engine (ODE) and Rotating Detonation Engine (RDE).
+I am now still alive, studying as a junior student in [College of Engineering](https://www.coe.pku.edu.cn), [Peking University](https://www.pku.edu.cn), majoring in Aerospace Engineering. My research interest includes Computer Vision, Large Language Model, World Model and AI For Science., aiming to provide brand-new paradigm for ML to reach AGI and solve important engineering issues in this process. I am also currently seeking internship opportunities at leading internet and tech companies, as well as academic research opportunities in the university that support pursuing higher degrees in related areas.
 
 >|谁终将声震人间，必长久深自缄默；谁终将亮如闪电，必长久如云漂泊。————尼采
 
