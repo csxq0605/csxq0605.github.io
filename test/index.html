@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUNer 人格测试 | 你是哪种模联人？</title>
+  <style>
+    :root {
+      --blue: #009EDB;
+      --blue-dark: #007ab8;
+      --dark: #0d1b2a;
+      --dark2: #1a2d40;
+      --gold: #f5a623;
+      --gold-dark: #d4891e;
+      --bg: #f0f4f8;
+      --card: #ffffff;
+      --text: #1a2332;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --green: #10b981;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC',
+        'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .site-header {
+      background: var(--dark);
+      color: white;
+      text-align: center;
+      padding: 18px 16px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .site-header .logo { font-size: 13px; letter-spacing: .15em; opacity: .6; text-transform: uppercase; margin-bottom: 2px; }
+    .site-header h1 { font-size: 20px; font-weight: 700; }
+
+    /* ── SCREENS ── */
+    .screen { display: none; max-width: 680px; margin: 0 auto; padding: 28px 16px 60px; }
+    .screen.active { display: block; }
+
+    /* ── START SCREEN ── */
+    .start-card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 44px 36px;
+      text-align: center;
+      box-shadow: 0 4px 32px rgba(0,0,0,.09);
+    }
+    .start-card .emoji { font-size: 72px; line-height: 1; margin-bottom: 20px; }
+    .start-card h2 { font-size: 28px; font-weight: 800; margin-bottom: 10px; }
+    .start-card .tagline { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 28px; max-width: 380px; margin-left: auto; margin-right: auto; }
+    .start-stats { display: flex; justify-content: center; gap: 32px; margin-bottom: 36px; }
+    .stat-item .num { font-size: 30px; font-weight: 800; color: var(--blue); }
+    .stat-item .lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .btn-start {
+      background: var(--blue);
+      color: white;
+      border: none;
+      padding: 16px 56px;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      letter-spacing: .03em;
+    }
+    .btn-start:hover { background: var(--blue-dark); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,158,219,.35); }
+    .disclaimer { font-size: 12px; color: var(--muted); margin-top: 18px; line-height: 1.6; }
+
+    /* ── QUIZ SCREEN ── */
+    .prog-wrap { margin-bottom: 20px; }
+    .prog-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+    .prog-meta strong { color: var(--blue); }
+    .prog-track { background: var(--border); height: 8px; border-radius: 4px; overflow: hidden; }
+    .prog-fill { background: linear-gradient(90deg, var(--blue), #4fc3f7); height: 100%; border-radius: 4px; transition: width .35s ease; }
+
+    .q-card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 32px 28px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.08);
+      margin-bottom: 16px;
+      animation: fadeUp .25s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .q-num { font-size: 12px; color: var(--blue); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 10px; }
+    .q-text { font-size: 18px; font-weight: 600; line-height: 1.55; margin-bottom: 24px; }
+
+    .options { display: flex; flex-direction: column; gap: 11px; }
+    .opt {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.5;
+      transition: all .18s;
+      background: white;
+      text-align: left;
+    }
+    .opt:hover { border-color: var(--blue); background: #f0f9ff; }
+    .opt.selected { border-color: var(--blue); background: #e8f4fd; }
+    .opt-letter {
+      min-width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all .18s;
+    }
+    .opt.selected .opt-letter { background: var(--blue); color: white; }
+
+    .q-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .btn-nav {
+      padding: 12px 28px;
+      border-radius: 50px;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .18s;
+    }
+    .btn-prev { background: var(--border); color: var(--muted); }
+    .btn-prev:hover { background: #d1d5db; }
+    .btn-next { background: var(--blue); color: white; }
+    .btn-next:hover:not(:disabled) { background: var(--blue-dark); }
+    .btn-next:disabled { background: #b3d9f0; cursor: not-allowed; }
+    .btn-submit { background: var(--gold); color: white; }
+    .btn-submit:hover { background: var(--gold-dark); }
+
+    .warn-text { font-size: 13px; color: #ef4444; text-align: center; min-height: 20px; margin-bottom: 8px; }
+
+    /* ── LOADING ── */
+    .loading-screen {
+      text-align: center;
+      padding: 80px 0;
+    }
+    .loading-emoji { font-size: 56px; animation: pulse 1.2s ease infinite; margin-bottom: 20px; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+    .loading-text { font-size: 16px; color: var(--muted); }
+
+    /* ── RESULT SCREEN ── */
+    .result-hero {
+      background: linear-gradient(135deg, var(--dark) 0%, var(--dark2) 100%);
+      border-radius: 20px;
+      padding: 36px 28px;
+      text-align: center;
+      color: white;
+      margin-bottom: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .result-hero::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -20%;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,158,219,.25), transparent 70%);
+    }
+    .result-hero .type-label { font-size: 12px; letter-spacing: .15em; opacity: .6; text-transform: uppercase; margin-bottom: 10px; }
+    .result-hero .type-emoji { font-size: 60px; margin-bottom: 12px; }
+    .result-hero .type-name { font-size: 36px; font-weight: 800; margin-bottom: 8px; }
+    .result-hero .match-line { font-size: 15px; opacity: .8; }
+    .result-hero .match-line span { font-size: 26px; font-weight: 800; color: var(--gold); }
+
+    .result-card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 26px 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.07);
+      margin-bottom: 14px;
+    }
+    .result-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 14px;
+      padding-left: 12px;
+      border-left: 4px solid var(--blue);
+    }
+    .result-desc { font-size: 15px; line-height: 1.85; color: var(--text); }
+    .result-quote {
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: #f8fafc;
+      border-radius: 10px;
+      font-size: 14px;
+      color: var(--muted);
+      font-style: italic;
+      border-left: 3px solid var(--gold);
+    }
+
+    .dim-list { display: flex; flex-direction: column; gap: 12px; }
+    .dim-row { display: flex; align-items: center; gap: 12px; }
+    .dim-name { font-size: 13px; color: var(--muted); width: 68px; flex-shrink: 0; }
+    .dim-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .dim-bar { height: 100%; border-radius: 4px; }
+    .dim-bar.blue { background: var(--blue); }
+    .dim-bar.gold { background: var(--gold); }
+    .dim-bar.green { background: var(--green); }
+    .dim-bar.red { background: #f87171; }
+    .dim-bar.purple { background: #a78bfa; }
+    .dim-val { font-size: 13px; font-weight: 700; width: 34px; text-align: right; }
+
+    .secondary-types { display: flex; flex-wrap: wrap; gap: 8px; }
+    .sec-badge {
+      padding: 5px 14px;
+      border-radius: 50px;
+      background: var(--bg);
+      font-size: 13px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-restart {
+      width: 100%;
+      padding: 16px;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      margin-top: 6px;
+    }
+    .btn-restart:hover { background: var(--blue-dark); }
+
+    @media(max-width:480px) {
+      .start-card { padding: 28px 20px; }
+      .q-card { padding: 24px 18px; }
+      .q-text { font-size: 16px; }
+      .opt { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">MUNer Personality Test</div>
+  <h1>模联人格测试</h1>
+</header>
+
+<!-- START -->
+<div id="start" class="screen active">
+  <div class="start-card">
+    <div class="emoji">🌐</div>
+    <h2>你是哪种模联人？</h2>
+    <p class="tagline">
+      31道关于模拟联合国的灵魂拷问，<br>
+      测出你在模联世界里真正的生存姿态。<br>
+      <em>本测试无任何科学依据，仅供娱乐自嘲。</em>
+    </p>
+    <div class="start-stats">
+      <div class="stat-item"><div class="num">31</div><div class="lbl">道题目</div></div>
+      <div class="stat-item"><div class="num">16</div><div class="lbl">种人格</div></div>
+      <div class="stat-item"><div class="num">5</div><div class="lbl">个维度</div></div>
+    </div>
+    <button class="btn-start" onclick="startQuiz()">开始测试</button>
+    <p class="disclaimer">
+      本测试为模联爱好者的自娱自乐产物，<br>
+      与任何正规心理学评估无关。<br>
+      大约需要 5-8 分钟完成。
+    </p>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+  <div class="prog-wrap">
+    <div class="prog-meta">
+      <span>第 <strong id="qNum">1</strong> 题 / 31</span>
+      <span id="qPct">0%</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  </div>
+  <div class="q-card" id="qCard">
+    <div class="q-num" id="qNumLabel">Q 01</div>
+    <div class="q-text" id="qText"></div>
+    <div class="options" id="optList"></div>
+  </div>
+  <div class="warn-text" id="warnText"></div>
+  <div class="q-nav">
+    <button class="btn-nav btn-prev" id="btnPrev" onclick="prevQ()">← 上一题</button>
+    <button class="btn-nav btn-next" id="btnNext" onclick="nextQ()">下一题 →</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="screen">
+  <div class="result-hero">
+    <div class="type-label">你的模联人格</div>
+    <div class="type-emoji" id="rEmoji"></div>
+    <div class="type-name" id="rName"></div>
+    <div class="match-line">匹配度 <span id="rMatch"></span>%</div>
+  </div>
+
+  <div class="result-card">
+    <h3>人格解读</h3>
+    <div class="result-desc" id="rDesc"></div>
+    <div class="result-quote" id="rQuote"></div>
+  </div>
+
+  <div class="result-card">
+    <h3>五维分析</h3>
+    <div class="dim-list" id="dimList"></div>
+  </div>
+
+  <div class="result-card">
+    <h3>次要倾向</h3>
+    <div class="secondary-types" id="secTypes"></div>
+  </div>
+
+  <button class="btn-restart" onclick="restart()">再测一次</button>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+
+const TYPES = {
+  观察员: {
+    emoji: '🪑',
+    tagline: '报名了，也来了，但仅此而已',
+    desc: '你是会场上最神秘的存在——有座位、有名牌，但没有存在感。你来模联不是为了外交，而是为了完成某种说不清楚的社会义务。你不发言、不递条子、不写文件，偶尔抬头看看台上，然后默默掏出手机继续刷微博。你的最高成就是：散场时没有任何人注意到你来过。',
+    quote: '"动议休息？好的。（内心：终于）"'
+  },
+  朋友圈特种兵: {
+    emoji: '📸',
+    tagline: '九宫格是你真正的决议草案',
+    desc: '对你来说，模联会场不过是一个高端布景板。你来这里的核心使命，是凑齐那九张完美的素材——持国家牌的、坐在会议桌旁的、茶歇时假装若有所思的。当别人在争论安理会决议时，你在思考滤镜和文案。你的出席率极高，但没有人记得你说过什么。',
+    quote: '"等一下，我先拍一张再说。"'
+  },
+  能工智人: {
+    emoji: '🤖',
+    tagline: 'AI说什么，我就念什么',
+    desc: '你代表的不是某个国家，而是当代人机协作的巅峰。立场文件？AI写的。开幕发言？AI写的。谈判备忘录？还是AI写的。你本人的唯一职责，是把这些内容用人类的声音念出来。当对方提出尖锐问题时，你微笑着说"请给我一点时间查阅资料"，然后悄悄打开聊天框。',
+    quote: '"根据最新分析，呃……（屏幕下方快速输入问题）"'
+  },
+  泰克西学派: {
+    emoji: '📱',
+    tagline: '地摊文学是我的学术基础',
+    desc: '在你的世界里，知识获取从来不需要那些晦涩的官方数据库。贴吧的暴论、包浆的百科词条、配着激昂BGM的三分钟解说视频——这才是真正接地气的外交智慧。当别国代表引用安理会决议时，你引用的是某个没有认证蓝V的微博大V，而且说得煞有介事。',
+    quote: '"这个数据来自一个非常权威的来源……（贴吧2017年的帖子）"'
+  },
+  学术蝗虫: {
+    emoji: '🍰',
+    tagline: '茶歇是你参会的唯一动力',
+    desc: '作为一名模联代表，你深刻理解了外交的核心——利益交换。而在你这里，"利益"的具体形态是小蛋糕、三明治和奶茶。你把开会时间精准拆解为"距离下次茶歇还有多少分钟"，一旦听到动议休息，你的反应速度远超任何专业运动员。你的国家牌功能不是用来发言，是用来占座位。',
+    quote: '"动议休息！（已提前离座迈步）"'
+  },
+  格式警察: {
+    emoji: '📐',
+    tagline: '格式问题比世界和平更重要',
+    desc: '别人在拯救世界，你在数空格。对你来说，一份决议草案的价值不在于内容是否能解决冲突，而在于首行是否缩进了两格、标点是否用了半角。在你的会场里，格式错误是比任何外交危机都更严重的灾难，而你就是那个永远不会对此睁一只眼闭一只眼的卫道士。',
+    quote: '"不好意思，你这里用了全角逗号。"'
+  },
+  包工头: {
+    emoji: '📋',
+    tagline: '你是模联会场的项目经理',
+    desc: '效率至上，这是你的外交哲学。你不亲自写发言稿，你负责分配任务；你不亲自发言，你负责信息整合；你参与谈判，但只出现在决策节点上。你的脑子里随时运行着一张甘特图，清楚地标注着每个代表正在做什么、应该做什么、以及还差多少时间完成。',
+    quote: '"A国写第一段，B国写第二段，C国——你去倒杯水来。"'
+  },
+  五常的傲慢: {
+    emoji: '🔱',
+    tagline: '一票否决，快乐无限',
+    desc: '手持否决权的感觉，是世界上最美妙的体验之一。你不是一个讲理的代表——你是一个讲实力的代表。当整个会场耗费三天精心起草的决议草案呈到桌上，你只需要轻描淡写地说一个字，就能让所有人的心血化为乌有。而你欣赏的，正是那一瞬间全场崩溃的表情。',
+    quote: '"否决。（优雅地放下笔）"'
+  },
+  意大利正统: {
+    emoji: '🗡️',
+    tagline: '背刺是一门艺术，你已登峰造极',
+    desc: '外交的最高境界，是让你的盟友直到最后一秒都还相信你。你深谙此道。昨晚你们一起熬夜写文件，今天表决现场你优雅地举起了反对票。你从不认为这是背叛——这叫做"基于国家利益的立场调整"。模联史上最惨烈的政治戏剧，往往都是从你悄悄推开会议室的门开始的。',
+    quote: '"很遗憾，我国在最后时刻不得不重新评估我们的立场。"'
+  },
+  雷神之锤: {
+    emoji: '🔨',
+    tagline: '你天生就应该坐在主席台上',
+    desc: '手里握着木槌的感觉，比任何权力都更直接。你对规则的热情，源于内心深处对秩序的极度渴望。超时发言？砸。程序性动议乱用？砸。手机没静音？砸。你的职业生涯有一个清晰的弧线：从代表到主席，从砸别人到让别人不敢被砸。',
+    quote: '"感谢该代表，但你的发言时间已经结束了。（砸）"'
+  },
+  刺客信条: {
+    emoji: '⚔️',
+    tagline: '危机委才是你真正的主场',
+    desc: '常规委里讨论该不该通过一项决议，你觉得太无聊。危机委里你可以发动政变、派遣军队、实施暗杀、投下核弹——这才叫外交。你在现实生活里是个温和的人，但一进危机委就像开了某个隐藏开关，分分钟能设计出让对手永久出局的连环陷阱。',
+    quote: '"我宣布：我国将对X国实施……外交手段。（危机指令已发送）"'
+  },
+  咖啡因导向: {
+    emoji: '☕',
+    tagline: '你的血管里流淌的早就不是血液了',
+    desc: '你爱模联，但模联也在消耗你。连续三天的会议、凌晨两点还在改稿、早上六点又要穿西装——这一切靠什么支撑？冰美式。你的桌面上从来不缺咖啡杯，你的眼睛下面从来不缺黑眼圈，但你从来没有因此缺席。疲惫是你的日常状态，但你已经分不清那是疲惫还是一种奇怪的快乐。',
+    quote: '"我没事，我只是需要再来一杯。"'
+  },
+  化缘大师: {
+    emoji: '💰',
+    tagline: '跑赞助是你最擅长的外交活动',
+    desc: '在你的模联生涯里，最成功的外交谈判不在会场内，而在会场外的教培机构、企业前台和酒店经理办公室。你掌握着一套独特的话术体系，能让原本对"模联"毫无概念的商务人士相信，赞助一场高中生的模拟会议是他们今年最明智的品牌投资。',
+    quote: '"您好，我想和您谈谈一个对贵公司非常有价值的合作机会……"'
+  },
+  知名模联人: {
+    emoji: '🌟',
+    tagline: '你的恶名从北京到上海无人不知',
+    desc: '你在模联圈里活得太久、做得太多，以至于你的名字本身就成了一种信号。有些人提起你是因为佩服，有些人提起你是因为被你坑过，有些人提起你是因为听说过你的传说——但无论如何，你的存在感从未消失过。你参加过的会议数量和认识的人脉，早就超出了正常模联人应有的边界。',
+    quote: '"我们以前开过会……哦，记不清了，太多了。"'
+  },
+  热泪盈眶: {
+    emoji: '🥹',
+    tagline: '每一次闭幕式都是一次灵魂震颤',
+    desc: '很多年了，你参加了很多场会议、写了很多文件、认识了很多人。你以为自己早已习以为常。但每次闭幕式的最后一槌落下，你总是控制不住眼眶的酸热——一半是情怀，一半是终于可以回去睡觉的如释重负。你是模联里的老炮儿，但从未真正变冷漠。',
+    quote: '"（努力憋着）我没事，只是眼睛进了点……格式问题。"'
+  },
+  天无二日: {
+    emoji: '👑',
+    tagline: '你注定要成为秘书长',
+    desc: '从你第一次踏进模联会场，你就已经在想：什么时候能坐到那把椅子上。你的一切行为都围绕着这个目标——发言、社交、组委、培训……你并非不热爱模联，只是你热爱的那部分恰好包括权力本身。有朝一日，你会站在开幕式的主席台上，用木槌宣布你亲手筹办的会议正式开始。',
+    quote: '"等我当上秘书长……"'
+  }
+};
+
+// Dimension definitions
+const DIMS = [
+  { key: 'exp',  label: '经验值', lo: '萌新',   hi: '老登',   color: 'blue'   },
+  { key: 'ind',  label: '卷度',   lo: '佛系',   hi: '卷王',   color: 'gold'   },
+  { key: 'soc',  label: '社交力', lo: '独狼',   hi: '外交家', color: 'green'  },
+  { key: 'sch',  label: '心机',   lo: '纯良',   hi: '城府深', color: 'red'    },
+  { key: 'rom',  label: '情怀',   lo: '理性',   hi: '感性',   color: 'purple' }
+];
+
+// Questions: each option has `types` (object: type->pts) and `dims` (object: dim->pts)
+const QUESTIONS = [
+  {
+    text: '当你听到"模联"这两个字，你的第一反应是？',
+    opts: [
+      { text: '这是我的人生事业！',          types: { 知名模联人:3, 天无二日:1 },          dims: { exp:3, ind:2, soc:2 } },
+      { text: '九宫格素材！',                types: { 朋友圈特种兵:3 },                    dims: { soc:2, ind:1 } },
+      { text: '有没有茶歇？',                types: { 学术蝗虫:3 },                        dims: { ind:-1 } },
+      { text: '这是什么比赛？',              types: { 观察员:3 },                          dims: { exp:-2 } }
+    ]
+  },
+  {
+    text: '参加模联前，你的立场文件是怎么来的？',
+    opts: [
+      { text: '认真查阅官方数据库和学术文献',  types: { 知名模联人:2, 格式警察:1 },       dims: { exp:2, ind:3 } },
+      { text: '贴吧＋百科＋激昂BGM解说视频',   types: { 泰克西学派:3 },                   dims: { ind:1 } },
+      { text: 'AI一键生成，我直接念就行',       types: { 能工智人:3 },                     dims: { ind:-2 } },
+      { text: '立场文件是什么？要提前写吗？',   types: { 观察员:3 },                       dims: { exp:-2, ind:-2 } }
+    ]
+  },
+  {
+    text: '正式会议期间，你最常做的事是？',
+    opts: [
+      { text: '积极举牌，疯狂抢话筒',          types: { 五常的傲慢:2, 天无二日:1 },        dims: { ind:2, soc:2, sch:1 } },
+      { text: '默默做笔记，分析各国立场',       types: { 知名模联人:2, 意大利正统:1 },     dims: { exp:2, ind:2, sch:2 } },
+      { text: '刷手机，数着距离茶歇还有多久',   types: { 学术蝗虫:2, 观察员:1 },           dims: { ind:-2 } },
+      { text: '拍照片，构思朋友圈文案',          types: { 朋友圈特种兵:3 },                 dims: { soc:1, ind:-1 } }
+    ]
+  },
+  {
+    text: '茶歇开始，你的第一个动作是？',
+    opts: [
+      { text: '继续和其他代表谈判，外交不停',  types: { 知名模联人:2, 意大利正统:1 },     dims: { ind:2, soc:2, sch:2 } },
+      { text: '冲向零食区，先下手为强',         types: { 学术蝗虫:3 },                     dims: {} },
+      { text: '掏出手机给零食拍九宫格',         types: { 朋友圈特种兵:2 },                 dims: { soc:1 } },
+      { text: '找角落坐下，闭目养神',           types: { 咖啡因导向:1, 观察员:1 },         dims: { ind:-1 } }
+    ]
+  },
+  {
+    text: '你最喜欢的委员会类型是？',
+    opts: [
+      { text: '常规委——文件扎实，讨论有深度',  types: { 格式警察:2, 知名模联人:1 },       dims: { exp:2, ind:2 } },
+      { text: '危机委——刺激好玩，随机应变',     types: { 刺客信条:3 },                     dims: { ind:2, sch:2 } },
+      { text: '哪个先结束我去哪个',             types: { 观察员:3 },                       dims: { ind:-2 } },
+      { text: '我只开英文委，别无他选',          types: { 知名模联人:2 },                   dims: { exp:3, ind:2 } }
+    ]
+  },
+  {
+    text: '写决议草案时，你主要负责什么？',
+    opts: [
+      { text: '亲自把控每一条款，字斟句酌',     types: { 格式警察:2, 知名模联人:1 },       dims: { ind:3, exp:2 } },
+      { text: '统筹分工，把任务分配给其他代表', types: { 包工头:3 },                        dims: { soc:2, sch:2, ind:2 } },
+      { text: '把我国名字塞进起草国名单就够了', types: { 观察员:3 },                        dims: { ind:-1 } },
+      { text: '让AI写，我负责review',           types: { 能工智人:2 },                      dims: { ind:-1 } }
+    ]
+  },
+  {
+    text: '另一个代表的决议草案出现了格式错误，你会？',
+    opts: [
+      { text: '立刻指出！格式是底线',           types: { 格式警察:3 },                     dims: { ind:3, sch:1 } },
+      { text: '在背后偷偷嘲笑，然后继续谈判',   types: { 意大利正统:2 },                   dims: { sch:3 } },
+      { text: '无所谓，内容对就行',             types: { 知名模联人:1, 包工头:1 },         dims: { exp:1 } },
+      { text: '我没注意到，我在刷手机',          types: { 观察员:2, 学术蝗虫:1 },           dims: { ind:-2 } }
+    ]
+  },
+  {
+    text: '会议到了第三天，你的状态是？',
+    opts: [
+      { text: '越来越兴奋，越打越起劲',         types: { 知名模联人:2, 天无二日:1 },        dims: { ind:3, exp:2 } },
+      { text: '靠咖啡和能量饮料硬撑',           types: { 咖啡因导向:3 },                    dims: { ind:2, rom:1 } },
+      { text: '算好了附近奶茶店的营业时间',      types: { 学术蝗虫:2 },                     dims: { ind:-1 } },
+      { text: '已经在看回程票了',               types: { 观察员:3 },                        dims: { ind:-3 } }
+    ]
+  },
+  {
+    text: '你和昨晚一起熬夜写草案的盟友，今天如何？',
+    opts: [
+      { text: '我们团结一致，赢得了最终投票',   types: { 知名模联人:2 },                   dims: { soc:2, rom:2 } },
+      { text: '我在表决环节优雅地跳反了他',      types: { 意大利正统:3 },                   dims: { sch:3 } },
+      { text: '是他先背刺我的，我只是还手',      types: { 意大利正统:2, 五常的傲慢:1 },     dims: { sch:2 } },
+      { text: '什么盟友？我没有盟友',           types: { 观察员:2 },                        dims: { soc:-2 } }
+    ]
+  },
+  {
+    text: '如果你当上了主席，最享受的是？',
+    opts: [
+      { text: '引导讨论，促成有价值的共识',     types: { 知名模联人:2 },                   dims: { exp:3, soc:2 } },
+      { text: '拿起木槌砸断超时发言的代表',      types: { 雷神之锤:3 },                     dims: { sch:2, ind:2 } },
+      { text: '欣赏代表们争得面红耳赤的样子',   types: { 五常的傲慢:2 },                    dims: { sch:3 } },
+      { text: '我不想当主席，太累了',           types: { 观察员:2 },                        dims: { ind:-2 } }
+    ]
+  },
+  {
+    text: '在安理会，你手握否决权，你会？',
+    opts: [
+      { text: '谨慎使用，以真实国家利益为准',   types: { 知名模联人:2 },                   dims: { exp:2, sch:1 } },
+      { text: '否！就是想享受那一刻的快感',      types: { 五常的傲慢:3 },                   dims: { sch:3, ind:1 } },
+      { text: '和其他P5暗中协调，联合否决',      types: { 意大利正统:2, 五常的傲慢:1 },     dims: { sch:3, soc:1 } },
+      { text: '我选了个小委，没有否决权',        types: { 观察员:2 },                        dims: { exp:-1 } }
+    ]
+  },
+  {
+    text: '会议结束后，你做的第一件事是？',
+    opts: [
+      { text: '立刻开始规划下一场会',           types: { 知名模联人:2, 天无二日:1 },        dims: { ind:2, exp:2 } },
+      { text: '整理照片，发九宫格朋友圈',        types: { 朋友圈特种兵:3 },                  dims: { soc:2 } },
+      { text: '倒头大睡，手机静音',             types: { 咖啡因导向:2 },                    dims: { ind:1, rom:1 } },
+      { text: '感慨一下，默默流下眼泪',          types: { 热泪盈眶:3 },                     dims: { rom:3 } }
+    ]
+  },
+  {
+    text: '发言时，你最常出现的情况是？',
+    opts: [
+      { text: '引经据典，安理会决议倒背如流',   types: { 知名模联人:2 },                   dims: { exp:3, ind:3 } },
+      { text: '"中国有句古话……"（你不是中国代表）', types: { 泰克西学派:2 },               dims: { sch:1 } },
+      { text: '"我觉得……"（忘了用国家代称）',   types: { 观察员:3 },                        dims: { exp:-2 } },
+      { text: '全程没有发言',                   types: { 观察员:2 },                        dims: { exp:-1, ind:-2 } }
+    ]
+  },
+  {
+    text: '在危机委，你最常使用的操作是？',
+    opts: [
+      { text: '精准微操，控制每一个军事单位',   types: { 刺客信条:3 },                     dims: { ind:3, sch:3 } },
+      { text: '直接暗杀掉所有潜在对手',          types: { 刺客信条:2, 意大利正统:1 },       dims: { sch:3, ind:2 } },
+      { text: '联合内阁发动政变',               types: { 刺客信条:1, 五常的傲慢:2 },        dims: { sch:3, soc:2 } },
+      { text: '危机委？我更适合常规委',          types: { 格式警察:1, 知名模联人:1 },        dims: { ind:1 } }
+    ]
+  },
+  {
+    text: '你认为一份好的决议草案，核心是什么？',
+    opts: [
+      { text: '实质内容和可操作的解决方案',     types: { 知名模联人:3 },                   dims: { exp:3, ind:3 } },
+      { text: '格式完美，无任何瑕疵',           types: { 格式警察:3 },                     dims: { ind:3 } },
+      { text: '我的国家名字出现在起草国列表里', types: { 观察员:3 },                        dims: { ind:-1 } },
+      { text: 'AI生成，有词儿、够长就行',        types: { 能工智人:3 },                     dims: { ind:-2 } }
+    ]
+  },
+  {
+    text: '如果你是组委，最让你头疼的是？',
+    opts: [
+      { text: '学术质量跟不上，有损会议品质',   types: { 知名模联人:2 },                   dims: { exp:2, ind:2 } },
+      { text: '赞助找不到，经费告急',           types: { 化缘大师:3 },                     dims: { ind:3, soc:2 } },
+      { text: '茶歇预算不够，代表要怨声载道',   types: { 学术蝗虫:2 },                     dims: {} },
+      { text: '会后家长打来投诉电话',           types: { 化缘大师:1, 雷神之锤:1 },         dims: { sch:1, ind:2 } }
+    ]
+  },
+  {
+    text: '为了社团活动的赞助，你愿意做什么？',
+    opts: [
+      { text: '跑遍周边所有机构，笑脸相迎',     types: { 化缘大师:3 },                     dims: { ind:3, soc:3 } },
+      { text: '写一份完整的赞助提案书',          types: { 包工头:2, 知名模联人:1 },         dims: { ind:3, exp:1 } },
+      { text: '拉上朋友一起，分头行动',          types: { 包工头:1, 意大利正统:1 },         dims: { soc:2, sch:1 } },
+      { text: '这不是我擅长的，请别人来吧',      types: { 观察员:2 },                        dims: { ind:-2 } }
+    ]
+  },
+  {
+    text: '你发现了会场内的一段桃色新闻，你会？',
+    opts: [
+      { text: '装作没看见，专注外交事务',        types: { 知名模联人:2 },                   dims: { exp:2, sch:1 } },
+      { text: '立刻发朋友圈，配上意味深长文案', types: { 朋友圈特种兵:3 },                  dims: { soc:2 } },
+      { text: '当作谈判筹码，用于外交博弈',      types: { 意大利正统:3 },                   dims: { sch:3, ind:2 } },
+      { text: '写进新闻稿，署上自己的名字',      types: { 朋友圈特种兵:1, 知名模联人:1 },   dims: { soc:1 } }
+    ]
+  },
+  {
+    text: '有人质疑你引用的数据"来源不可靠"，你会？',
+    opts: [
+      { text: '立刻道歉，重新查证权威来源',     types: { 格式警察:1, 知名模联人:1 },        dims: { exp:2, ind:2 } },
+      { text: '贴吧老哥说的还能有错？',          types: { 泰克西学派:3 },                   dims: { sch:1 } },
+      { text: '反问他：联合国网站就一定准确？',  types: { 五常的傲慢:2, 泰克西学派:1 },     dims: { sch:3 } },
+      { text: '沉默——因为我也是AI生成的',        types: { 能工智人:3 },                     dims: {} }
+    ]
+  },
+  {
+    text: '你的模联履历是什么水平？',
+    opts: [
+      { text: '空白，这是我第一次接触模联',      types: { 观察员:2 },                        dims: { exp:-3 } },
+      { text: '参加了好几场，都是小小外交官',   types: { 知名模联人:1 },                    dims: { exp:1 } },
+      { text: '全国各大赛事都留过我的名字',      types: { 知名模联人:3, 天无二日:1 },        dims: { exp:3, ind:2 } },
+      { text: '履历很长，但有些是线上水会',      types: { 知名模联人:1, 包工头:1 },         dims: { exp:2 } }
+    ]
+  },
+  {
+    text: '参会前一晚，你在做什么？',
+    opts: [
+      { text: '认真复习立场文件，查漏补缺',     types: { 知名模联人:2, 格式警察:1 },        dims: { ind:3, exp:2 } },
+      { text: '让AI再重新生成一版更好的',        types: { 能工智人:2 },                     dims: { ind:1 } },
+      { text: '睡觉，养精蓄锐',                 types: { 观察员:1, 咖啡因导向:1 },          dims: { ind:-1 } },
+      { text: '和盟友开电话会，谋划策略',        types: { 意大利正统:2, 包工头:1 },         dims: { ind:2, soc:2, sch:3 } }
+    ]
+  },
+  {
+    text: '模联闭幕式上，你哭了。原因是？',
+    opts: [
+      { text: '感动，这段经历对我意义深远',     types: { 热泪盈眶:3 },                     dims: { rom:3, exp:2 } },
+      { text: '没拿到最佳代表，实在不甘心',      types: { 雷神之锤:2, 天无二日:1 },         dims: { ind:2, rom:1 } },
+      { text: '太累了，终于结束了',             types: { 咖啡因导向:2 },                    dims: { ind:2, rom:1 } },
+      { text: '没哭，我已经麻木了',             types: { 观察员:2, 知名模联人:1 },          dims: { exp:2, rom:-2 } }
+    ]
+  },
+  {
+    text: '你是如何看待"最佳代表"这个奖项的？',
+    opts: [
+      { text: '我每次都是冲着它去的',           types: { 天无二日:2, 雷神之锤:1 },         dims: { ind:3, sch:1 } },
+      { text: '重在参与，拿不拿奖无所谓',        types: { 观察员:2 },                        dims: {} },
+      { text: '拿到了很开心，但更享受过程',      types: { 知名模联人:2, 热泪盈眶:1 },       dims: { exp:2, rom:2 } },
+      { text: '最重要的是茶歇，管它什么奖',      types: { 学术蝗虫:3 },                     dims: {} }
+    ]
+  },
+  {
+    text: '模联圈内的上古八卦和传说，你了解吗？',
+    opts: [
+      { text: '不仅了解，我还是其中的主角',     types: { 知名模联人:3, 热泪盈眶:1 },       dims: { exp:3, rom:2, soc:2 } },
+      { text: '听说过一些，从学长学姐那里',      types: { 知名模联人:1 },                   dims: { exp:1 } },
+      { text: '一点都不知道，我还是新人',        types: { 观察员:2 },                        dims: { exp:-2 } },
+      { text: '什么圈？模联有圈子吗？',          types: { 观察员:2 },                        dims: { exp:-2 } }
+    ]
+  },
+  {
+    text: '如果你的模联社团面临倒闭，你会？',
+    opts: [
+      { text: '全力以赴，想尽办法拯救它',        types: { 天无二日:2, 化缘大师:1 },         dims: { ind:3, rom:2, soc:2 } },
+      { text: '冷静分析，看看还有没有可能',      types: { 包工头:2 },                        dims: { ind:2, sch:1 } },
+      { text: '伤心，但能力有限',               types: { 热泪盈眶:2 },                     dims: { rom:3 } },
+      { text: '悄悄退群，假装不知道',           types: { 观察员:2 },                        dims: { rom:-1 } }
+    ]
+  },
+  {
+    text: '你最享受模联的哪个环节？',
+    opts: [
+      { text: '正式辩论和发言',                 types: { 知名模联人:2, 五常的傲慢:1 },     dims: { exp:2, ind:2 } },
+      { text: '非正式磋商，私下谈判',           types: { 意大利正统:2, 包工头:1 },         dims: { sch:2, soc:2 } },
+      { text: '茶歇和会间休息',                 types: { 学术蝗虫:3 },                     dims: {} },
+      { text: '闭幕式和颁奖仪式',               types: { 热泪盈眶:2, 天无二日:1 },         dims: { rom:3 } }
+    ]
+  },
+  {
+    text: '如果你是秘书长，你的第一件事是？',
+    opts: [
+      { text: '制定学术政策，提升会议品质',     types: { 知名模联人:2, 格式警察:1 },        dims: { exp:3, ind:3 } },
+      { text: '以我的名义发一篇秘书长致辞',     types: { 天无二日:3 },                     dims: { ind:2, sch:1 } },
+      { text: '确保茶歇预算充足',               types: { 学术蝗虫:2 },                     dims: {} },
+      { text: '我不想当秘书长，太麻烦了',        types: { 观察员:2 },                        dims: { ind:-2 } }
+    ]
+  },
+  {
+    text: '对于模联新生，你会告诉他们？',
+    opts: [
+      { text: '认真学程序规则，这是一切基础',   types: { 知名模联人:2, 格式警察:1 },        dims: { exp:2, ind:2 } },
+      { text: '多参与多发言，克服紧张感',        types: { 雷神之锤:1, 知名模联人:1 },       dims: { soc:2, ind:1 } },
+      { text: '茶歇要快，去晚了就没有了',        types: { 学术蝗虫:2 },                     dims: {} },
+      { text: '先想清楚自己要不要参加',          types: { 观察员:2 },                        dims: {} }
+    ]
+  },
+  {
+    text: '模联结束多年，你还在关注这个圈子吗？',
+    opts: [
+      { text: '当然，我现在还在开会',           types: { 知名模联人:3 },                   dims: { exp:3, ind:3, rom:2 } },
+      { text: '偶尔刷到相关内容会停下来看',     types: { 热泪盈眶:2 },                     dims: { rom:3, exp:2 } },
+      { text: '已经淡出，但有时会想起',          types: { 热泪盈眶:1 },                     dims: { rom:2 } },
+      { text: '早就不关注了，那是年轻时的事',   types: { 观察员:2 },                        dims: { rom:-1 } }
+    ]
+  },
+  {
+    text: '你在模联场合认识了一个很有意思的人，你会？',
+    opts: [
+      { text: '认真聊，建立真实的联系',          types: { 知名模联人:2 },                   dims: { soc:3, rom:2 } },
+      { text: '加微信，说不定以后有用',          types: { 意大利正统:2, 包工头:1 },         dims: { sch:2, soc:2 } },
+      { text: '拍张合照，发朋友圈',             types: { 朋友圈特种兵:2 },                  dims: { soc:1 } },
+      { text: '点点头，然后继续刷手机',          types: { 观察员:3 },                        dims: { soc:-2 } }
+    ]
+  },
+  {
+    text: '最后一题：如果要给自己的模联生涯写一句墓志铭，你会写？',
+    opts: [
+      { text: '"永远在场，永远在发言。"',        types: { 知名模联人:2, 天无二日:1 },        dims: { exp:3, ind:2 } },
+      { text: '"九宫格是最美的决议草案。"',       types: { 朋友圈特种兵:3 },                  dims: { soc:2 } },
+      { text: '"格式永远无可挑剔。"',            types: { 格式警察:3 },                     dims: { ind:3 } },
+      { text: '"来过，但没有人注意到。"',         types: { 观察员:3 },                        dims: {} }
+    ]
+  }
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let current = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+
+// ─────────────────────────────────────────────
+// INIT / RENDER
+// ─────────────────────────────────────────────
+function startQuiz() {
+  showScreen('quiz');
+  current = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  renderQ();
+}
+
+function renderQ() {
+  const q = QUESTIONS[current];
+  const letters = ['A', 'B', 'C', 'D'];
+
+  document.getElementById('qNum').textContent = current + 1;
+  document.getElementById('qPct').textContent = Math.round((current / QUESTIONS.length) * 100) + '%';
+  document.getElementById('progFill').style.width = (current / QUESTIONS.length * 100) + '%';
+  document.getElementById('qNumLabel').textContent = 'Q ' + String(current + 1).padStart(2, '0');
+  document.getElementById('qText').textContent = q.text;
+  document.getElementById('warnText').textContent = '';
+
+  // Rebuild options
+  const list = document.getElementById('optList');
+  list.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt' + (answers[current] === i ? ' selected' : '');
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt.text}</span>`;
+    btn.onclick = () => selectOpt(i);
+    list.appendChild(btn);
+  });
+
+  // Nav buttons
+  document.getElementById('btnPrev').style.display = current === 0 ? 'none' : '';
+  const isLast = current === QUESTIONS.length - 1;
+  const btnNext = document.getElementById('btnNext');
+  btnNext.textContent = isLast ? '查看结果 ✨' : '下一题 →';
+  btnNext.className = 'btn-nav btn-next' + (isLast ? ' btn-submit' : '');
+  btnNext.disabled = answers[current] === null;
+
+  // Re-animate
+  const card = document.getElementById('qCard');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = '';
+}
+
+function selectOpt(idx) {
+  answers[current] = idx;
+  document.getElementById('warnText').textContent = '';
+  document.getElementById('btnNext').disabled = false;
+  // Re-render options
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach((o, i) => o.classList.toggle('selected', i === idx));
+  document.querySelector(`.opt:nth-child(${idx + 1}) .opt-letter`).style.background = '';
+}
+
+function nextQ() {
+  if (answers[current] === null) {
+    document.getElementById('warnText').textContent = '请先选择一个选项 ~';
+    return;
+  }
+  if (current < QUESTIONS.length - 1) {
+    current++;
+    renderQ();
+  } else {
+    computeResult();
+  }
+}
+
+function prevQ() {
+  if (current > 0) { current--; renderQ(); }
+}
+
+// ─────────────────────────────────────────────
+// SCORING
+// ─────────────────────────────────────────────
+function computeResult() {
+  // Show loading
+  showScreen('quiz');
+  const quizEl = document.getElementById('quiz');
+  quizEl.innerHTML = `
+    <div class="loading-screen">
+      <div class="loading-emoji">🌐</div>
+      <div class="loading-text">正在分析你的外交人格……</div>
+    </div>`;
+
+  setTimeout(() => {
+    // Tally type scores
+    const typeScores = {};
+    Object.keys(TYPES).forEach(t => typeScores[t] = 0);
+
+    // Tally dim scores
+    const dimRaw = { exp:0, ind:0, soc:0, sch:0, rom:0 };
+
+    answers.forEach((sel, qi) => {
+      if (sel === null) return;
+      const opt = QUESTIONS[qi].opts[sel];
+      Object.entries(opt.types).forEach(([t, p]) => { typeScores[t] = (typeScores[t]||0) + p; });
+      Object.entries(opt.dims).forEach(([d, p])  => { dimRaw[d] = (dimRaw[d]||0) + p; });
+    });
+
+    // Find winner
+    const sorted = Object.entries(typeScores).sort((a,b) => b[1]-a[1]);
+    const winner = sorted[0][0];
+    const winScore = sorted[0][1];
+    const totalPossible = QUESTIONS.length * 3;
+    const matchPct = Math.min(99, Math.max(72, Math.round((winScore / totalPossible) * 100 * 2.5)));
+
+    // Normalise dims to 0-100
+    const dimMax = 15;
+    const dimNorm = {};
+    DIMS.forEach(d => {
+      dimNorm[d.key] = Math.round(((dimRaw[d.key] + dimMax) / (dimMax * 2)) * 100);
+    });
+
+    renderResult(winner, matchPct, dimNorm, sorted.slice(1,4).map(s=>s[0]));
+  }, 1800);
+}
+
+// ─────────────────────────────────────────────
+// RESULT RENDER
+// ─────────────────────────────────────────────
+function renderResult(typeName, matchPct, dimNorm, secondary) {
+  const t = TYPES[typeName];
+
+  document.getElementById('rEmoji').textContent = t.emoji;
+  document.getElementById('rName').textContent = typeName;
+  document.getElementById('rMatch').textContent = matchPct;
+  document.getElementById('rDesc').textContent = t.desc;
+  document.getElementById('rQuote').textContent = t.quote;
+
+  // Dims
+  const dimList = document.getElementById('dimList');
+  dimList.innerHTML = '';
+  DIMS.forEach(d => {
+    const v = dimNorm[d.key];
+    const row = document.createElement('div');
+    row.className = 'dim-row';
+    row.innerHTML = `
+      <span class="dim-name">${d.label}</span>
+      <div class="dim-track">
+        <div class="dim-bar ${d.color}" style="width:${v}%"></div>
+      </div>
+      <span class="dim-val" style="color:var(--${d.color})">${v}</span>
+    `;
+    dimList.appendChild(row);
+  });
+
+  // Secondary
+  const secEl = document.getElementById('secTypes');
+  secEl.innerHTML = secondary.map(s =>
+    `<span class="sec-badge">${TYPES[s].emoji} ${s}</span>`
+  ).join('');
+
+  showScreen('result');
+}
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restart() {
+  // Restore quiz HTML in case it was replaced by loading screen
+  const quizEl = document.getElementById('quiz');
+  quizEl.innerHTML = `
+    <div class="prog-wrap">
+      <div class="prog-meta">
+        <span>第 <strong id="qNum">1</strong> 题 / 31</span>
+        <span id="qPct">0%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    </div>
+    <div class="q-card" id="qCard">
+      <div class="q-num" id="qNumLabel">Q 01</div>
+      <div class="q-text" id="qText"></div>
+      <div class="options" id="optList"></div>
+    </div>
+    <div class="warn-text" id="warnText"></div>
+    <div class="q-nav">
+      <button class="btn-nav btn-prev" id="btnPrev" onclick="prevQ()">← 上一题</button>
+      <button class="btn-nav btn-next" id="btnNext" onclick="nextQ()">下一题 →</button>
+    </div>
+  `;
+  startQuiz();
+}
+</script>
+</body>
+</html>
