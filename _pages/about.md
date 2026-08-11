@@ -16,9 +16,9 @@ I am currently working on AI agents for fusion-energy simulation, combustion mod
 
 > 谁终将声震人间，必长久深自缄默；谁终将亮如闪电，必长久如云漂泊。——尼采
 
-<span class="anchor" id="research-interests"></span>
+<span class="anchor" id="research-interest"></span>
 
-# 🔬 Research
+# 🔬 Research Interest
 
 - **Reliable AI Agents and Harnesses:** long-horizon memory and context, tool and knowledge integration, multi-agent orchestration, permission control, failure recovery, and evaluation.
 - **Scientific Workflows:** agents that plan, execute, inspect, and reproduce simulation or experimental pipelines while keeping state and tool traces auditable.
@@ -29,7 +29,7 @@ I am currently working on AI agents for fusion-energy simulation, combustion mod
 # 🔥 News
 
 - *2026.07*: Joined **Hangzhou Yuanxi Technology** as an AI Agent Developer Intern.
-- *2026.05*: Contributed a Core–Adapter architecture and session-scoped fallback state machine to [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent/pull/4298); the design was adopted upstream.
+- *2026.05 - now*: Contributing to [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent/pull/4298), beginning with a Core–Adapter architecture and session-scoped fallback state machine that were adopted upstream.
 - *2026.03*: Joined the **AI + Fusion Energy Series Project** at Peking University.
 - *2025.09*: Received the **National Scholarship** and was named a Merit Student of Peking University.
 
@@ -57,6 +57,12 @@ I am currently working on AI agents for fusion-energy simulation, combustion mod
 - **[oh-my-opencode (now oh-my-openagent)](https://github.com/code-yeongyu/oh-my-openagent/pull/4298)** — An upstreamed open-source contribution that separates reusable agent policy from harness-specific side effects through a Core–Adapter boundary and a testable per-session fallback state machine.
 - **[Where Is My Codex (Flow Rescue)](https://github.com/csxq0605/where-is-my-codex)** — A computer-graphics course project: a 2D fluid-puzzle game built with Python, Taichi, Position-Based Fluids, GPU/CPU backends, five playable levels, and a Tiled import pipeline.
 - **[Tiny PyTorch](https://github.com/csxq0605/pku-aiprogramming)** — An AI programming course project implementing tensors, automatic differentiation, neural-network operators, C++/CUDA storage and kernels, cuBLAS acceleration, and end-to-end MLP/CNN training.
+
+<span class="anchor" id="publications"></span>
+
+# 📝 Publications
+
+- No publications yet. Manuscripts and preprints will be listed here as they become available.
 
 <span class="anchor" id="honors-and-awards"></span>
 
