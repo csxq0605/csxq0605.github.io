@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: cv
 title: "CV"
 permalink: /cv/
 ---
@@ -106,7 +106,7 @@ permalink: /cv/
         data-cv-target="/assets/cv/CV.pdf#view=FitH"
         data-cv-download="/assets/cv/CV.pdf"
         data-cv-title="English CV PDF preview"
-        data-cv-open-label="Open English PDF in a new tab"
+        data-cv-open-label="Open English PDF"
         aria-pressed="true">
         English CV
       </button>
@@ -116,7 +116,7 @@ permalink: /cv/
         data-cv-target="/assets/cv/cv%E4%B8%AD%E6%96%87.pdf#view=FitH"
         data-cv-download="/assets/cv/cv%E4%B8%AD%E6%96%87.pdf"
         data-cv-title="Chinese CV PDF preview"
-        data-cv-open-label="在新标签页打开中文版 PDF"
+        data-cv-open-label="打开中文版 PDF"
         aria-pressed="false">
         中文简历
       </button>
@@ -125,10 +125,8 @@ permalink: /cv/
     <a
       class="cv-toolbar__link"
       id="cv-open-link"
-      href="/assets/cv/CV.pdf"
-      target="_blank"
-      rel="noopener">
-      Open English PDF in a new tab
+      href="/assets/cv/CV.pdf">
+      Open English PDF
     </a>
   </div>
 
@@ -156,17 +154,6 @@ permalink: /cv/
     var frame = cvPage.querySelector(".cv-embed__frame");
     var buttons = cvPage.querySelectorAll(".cv-switcher__button");
     var openLink = cvPage.querySelector("#cv-open-link");
-    var historyBackLink = document.querySelector("#cv-history-back");
-
-    if (historyBackLink) {
-      historyBackLink.addEventListener("click", function (event) {
-        if (document.referrer && window.history.length > 1) {
-          event.preventDefault();
-          window.history.back();
-        }
-      });
-    }
-
     function activateButton(activeButton) {
       var target = activeButton.getAttribute("data-cv-target");
       var downloadTarget = activeButton.getAttribute("data-cv-download");

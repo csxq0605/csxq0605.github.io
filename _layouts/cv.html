@@ -1,0 +1,21 @@
+---
+layout: compress
+---
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    {% include head.html %}
+    {% include head/custom.html %}
+  </head>
+
+  <body>
+    {% include browser-upgrade.html %}
+
+    <main class="cv-viewer" role="main">
+      {{ content }}
+    </main>
+
+    {% include scripts.html %}
+  </body>
+</html>
