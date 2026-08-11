@@ -3,17 +3,20 @@ main:
   - title: "About Me"
     url: "/#about-me"
 
-  - title: "Research Interests"
+  - title: "Research"
     url: "/#research-interests"
 
-  - title: "Research"
-    url: "/#research-experience"
+  - title: "News"
+    url: "/#news"
 
-  - title: "Internship"
-    url: "/#internship-experience"
+  - title: "Education"
+    url: "/#education"
+
+  - title: "Experience"
+    url: "/#experience"
 
   - title: "Projects"
-    url: "/#selected-projects"
+    url: "/#projects"
 
   - title: "Honors"
     url: "/#honors-and-awards"

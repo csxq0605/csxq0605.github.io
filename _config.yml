@@ -21,14 +21,14 @@ baidu_site_verification  :  # get baidu_site_verification from https://ziyuan.ba
 
 # Site Author
 author:
-  name             : "Wangjie Su"
+  name             : "Wangjie Su   Bjergsen"
   avatar           : "images/android-chrome-512x512.png"
-  bio              : "AI Agents · Scientific Workflows · Embodied Intelligence"
+  bio              : "Peking University"
   location         : "Beijing, China"
-  employer         : "Peking University"
+  employer         :
   pubmed           : 
   googlescholar    : 
-  email            : "wsu0605@stu.pku.edu.cn"
+  email            : "wsu0605@gmail.com"
   researchgate     :  # e.g., "https://www.researchgate.net/profile/yourprofile"
   uri              :
   bitbucket        :
@@ -49,7 +49,7 @@ author:
   pinterest        :
   soundcloud       :
   stackoverflow    : # http://stackoverflow.com/users/123456/username
-  steam            :
+  steam            : "76561199022340902"
   tumblr           :
   twitter          : 
   vine             :
