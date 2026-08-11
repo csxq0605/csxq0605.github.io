@@ -156,6 +156,16 @@ permalink: /cv/
     var frame = cvPage.querySelector(".cv-embed__frame");
     var buttons = cvPage.querySelectorAll(".cv-switcher__button");
     var openLink = cvPage.querySelector("#cv-open-link");
+    var historyBackLink = document.querySelector("#cv-history-back");
+
+    if (historyBackLink) {
+      historyBackLink.addEventListener("click", function (event) {
+        if (document.referrer && window.history.length > 1) {
+          event.preventDefault();
+          window.history.back();
+        }
+      });
+    }
 
     function activateButton(activeButton) {
       var target = activeButton.getAttribute("data-cv-target");
