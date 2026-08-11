@@ -97,6 +97,7 @@ permalink: /cv/
 </style>
 
 <div class="cv-page">
+  <p class="cv-note"><strong>Updated August 2026.</strong> Switch between the synchronized English and Chinese versions below.</p>
   <div class="cv-toolbar">
     <div class="cv-switcher" role="group" aria-label="CV language switcher">
       <button
@@ -141,7 +142,7 @@ permalink: /cv/
       height="100%">
     </iframe>
   </div>
-  <p class="cv-note">If the embedded preview looks odd in your browser, use the link on the right to open the current PDF directly.</p>
+  <p class="cv-note">If the embedded preview looks odd in your browser, use the link above to open the current PDF directly.</p>
 </div>
 
 <script>

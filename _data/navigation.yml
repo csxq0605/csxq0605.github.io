@@ -3,23 +3,20 @@ main:
   - title: "About Me"
     url: "/#about-me"
 
-  - title: "Contacts"
-    url: "/#-contacts"
+  - title: "Research Interests"
+    url: "/#research-interests"
 
-  - title: "News"
-    url: "/#-news"
+  - title: "Research"
+    url: "/#research-experience"
 
-  - title: "Educations"
-    url: "/#-educations"
+  - title: "Internship"
+    url: "/#internship-experience"
 
-  - title: "Experiences"
-    url: "/#-experiences"
+  - title: "Projects"
+    url: "/#selected-projects"
 
-  - title: "Publications"
-    url: "/#-publications"
-
-  - title: "Honors and Awards"
-    url: "/#-honors-and-awards"
+  - title: "Honors"
+    url: "/#honors-and-awards"
 
   - title: "CV"
     url: "/cv/"
