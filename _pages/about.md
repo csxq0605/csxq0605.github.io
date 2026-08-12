@@ -20,16 +20,16 @@ I am currently working on AI agents for fusion-energy simulation, combustion mod
 
 # 🔬 Research Interest
 
-- **Core question:** How can foundation models become durable agents whose capabilities are definable, transferable, inspectable, and recoverable across models, Harnesses, and domains? I study capability/policy separation from execution adapters, long-horizon state and context, tool-use semantics, multi-agent coordination, failure recovery, and evaluation.
-- **Scientific workflows:** I use simulation and experimental pipelines as testbeds for agents that plan, execute, verify, and reproduce stateful processes while keeping evidence, decisions, and tool traces auditable.
-- **Embodied and multimodal agents:** I aim to extend the same abstractions to systems in which multimodal sensing, world models, and physical action form closed loops under partial observability and safety constraints.
+- **Reliable AI Agents and Harnesses:** long-horizon memory and context, tool and knowledge integration, multi-agent orchestration, permission control, failure recovery, and evaluation.
+- **Scientific Workflows:** agents that plan, execute, inspect, and reproduce simulation or experimental pipelines while keeping state and tool traces auditable.
+- **Embodied and Multimodal Agents:** grounding ReAct-style reasoning in multimodal perception, sensor streams, world models, and physical action to form perception–planning–action–feedback loops.
 
 <span class="anchor" id="news"></span>
 
 # 🔥 News
 
 - *2026.07*: Joined **Hangzhou Yuanxi Technology** as an AI Agent Developer Intern.
-- *2026.05 - now*: Contributing to [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent/pull/4298), beginning with a cross-Harness Core–Adapter extraction and session-scoped fallback protocol that validated the project's monorepo direction.
+- *2026.05 - now*: Contributing to [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent/pull/4298), from a Core–Adapter architecture and session-scoped fallback protocol to ongoing work on the monorepo refactor.
 - *2026.03*: Joined the **AI + Fusion Energy Series Project** at Peking University.
 - *2025.09*: Received the **National Scholarship** and was named a Merit Student of Peking University.
 
@@ -45,7 +45,7 @@ I am currently working on AI agents for fusion-energy simulation, combustion mod
 
 # 💻 Experience
 
-- *2026.07 - now*, **AI Agent Developer Intern**, Hangzhou Yuanxi Technology. Independently designed and implemented [ManySelves](https://github.com/csxq0605/manyselves), a general-purpose capability substrate that defines agent teams as versionable Identity contracts and Skill documents, then realizes them through durable, recoverable execution. Its FastAPI boundary makes capability transfer, multi-agent coordination, memory, and recovery testable independently of the client or application domain.
+- *2026.07 - now*, **AI Agent Developer Intern**, Hangzhou Yuanxi Technology. Independently designed and implemented [ManySelves](https://github.com/csxq0605/manyselves), a general-purpose capability substrate that defines agent teams as versionable Identity contracts and Skill documents, then realizes them through durable, recoverable execution. Its FastAPI boundary supports controlled study of capability transfer, multi-agent coordination, memory, and recovery across different task workflows and future tasks.
 - *2026.03 - now*, **Undergraduate Researcher**, AI + Fusion Energy Series Project, Xinao Technology Innovation Center, Peking University. Using Nexgent as an experimental harness for long-horizon, recoverable, and auditable fusion-energy simulation workflows. PIs: Prof. Yunfeng Liang and [Prof. Songfang Huang](https://www.coe.pku.edu.cn/teaching/all_time/13007.html).
 - *2025.05 - now*, **Undergraduate Researcher**, Combustion Laboratory, Peking University. Studying multiscale combustion processes and the complementary roles of mechanistic and data-driven models under [Prof. Zheng Chen](https://www.coe.pku.edu.cn/teaching/all_time/7195.html).
 
@@ -54,7 +54,7 @@ I am currently working on AI agents for fusion-energy simulation, combustion mod
 # 🛠 Projects
 
 - **[Nexgent: Scientific Agent Harness](https://github.com/csxq0605/Nexgent)** — A model-agnostic, frontend-neutral agent runtime for scientific workflows, with MCP tool bridging, multi-model routing, workflow orchestration, typed memory, checkpoints, permissions, and recoverable execution.
-- **[oh-my-opencode (now oh-my-openagent)](https://github.com/code-yeongyu/oh-my-openagent/pull/4298)** — Investigated which agent behaviors should remain invariant across Harnesses; proposed a Core–Adapter DAG, a zero-dependency configuration core, and a session-scoped fallback protocol that turn implicit integration logic into portable, testable policy. The work validated the package-extraction direction later continued in maintainer-led monorepo restructuring.
+- **[oh-my-opencode (now oh-my-openagent)](https://github.com/code-yeongyu/oh-my-openagent/pull/4298)** — Investigated which agent behaviors should remain invariant across Harnesses; proposed a Core–Adapter DAG, a zero-dependency configuration core, and a session-scoped fallback protocol that turn implicit integration logic into portable, testable policy. Preserved existing call sites through re-export shims, validated state-machine boundaries, and continue to help lead the monorepo refactor toward reusable Harness-independent plugins.
 - **[Where Is My Codex (Flow Rescue)](https://github.com/csxq0605/where-is-my-codex)** — A computer-graphics course project: a 2D fluid-puzzle game built with Python, Taichi, Position-Based Fluids, GPU/CPU backends, five playable levels, and a Tiled import pipeline.
 - **[Tiny PyTorch](https://github.com/csxq0605/pku-aiprogramming)** — An AI programming course project implementing tensors, automatic differentiation, neural-network operators, C++/CUDA storage and kernels, cuBLAS acceleration, and end-to-end MLP/CNN training.
 
