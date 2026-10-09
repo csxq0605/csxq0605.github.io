@@ -30,7 +30,7 @@ I am **actively seeking internship opportunities** in AI agents, agent harness a
 
 # 🔥 News
 
-- *2026.07*: Joined **Hangzhou Yuanxi Technology** as an independent project lead and one of the startup's first technical team members.
+- *2026.06*: Joined **Hangzhou Yuanxi Technology** as an independent project lead and one of the startup's first technical team members.
 - *2026.05 - now*: Contributing to [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent/pull/4298), from a Core–Adapter architecture and session-scoped fallback protocol to ongoing work on the monorepo refactor.
 - *2026.03*: Joined the **AI + Fusion Energy Series Project** at Peking University.
 - *2025.09*: Received the **National Scholarship** and was named a Merit Student of Peking University.
@@ -47,7 +47,7 @@ I am **actively seeking internship opportunities** in AI agents, agent harness a
 
 # 💻 Experience
 
-- *2026.07 - now*, **Independent Project Lead and Early Technical Team Member**, Hangzhou Yuanxi Technology. Independently designed and implemented [ManySelves](https://github.com/csxq0605/manyselves), a general-purpose capability substrate that defines agent teams as versionable Identity contracts and Skill documents, then realizes them through durable, recoverable execution. Its FastAPI boundary supports controlled study of capability transfer, multi-agent coordination, memory, and recovery across different task workflows and future tasks.
+- *2026.06 - 2026.09*, **Independent Project Lead and Early Technical Team Member**, Hangzhou Yuanxi Technology. Independently designed and implemented [ManySelves](https://github.com/csxq0605/manyselves), a general-purpose capability substrate that defines agent teams as versionable Identity contracts and Skill documents, then realizes them through durable, recoverable execution. Its FastAPI boundary supports controlled study of capability transfer, multi-agent coordination, memory, and recovery across different task workflows and future tasks.
 - *2026.03 - now*, **Undergraduate Researcher**, AI + Fusion Energy Series Project, Xinao Technology Innovation Center, Peking University. Studying long-horizon research autonomy: preserving executable research state across interruptions and advancing only through independent evidence. The project develops four layers for orchestration/execution, evidence/verification, memory/evolution, and governance/collaboration; Nexgent provides the long-running substrate, while fusion serves as a future domain-transfer and validation setting. PIs: Prof. Yunfeng Liang and [Prof. Songfang Huang](https://www.coe.pku.edu.cn/teaching/all_time/13007.html).
 - *2025.05 - now*, **Undergraduate Researcher**, Combustion Laboratory, Peking University. Studying multiscale combustion processes and the complementary roles of mechanistic and data-driven models under [Prof. Zheng Chen](https://www.coe.pku.edu.cn/teaching/all_time/7195.html).
 
