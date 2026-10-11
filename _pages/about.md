@@ -30,7 +30,6 @@ I am **actively seeking internship opportunities** in AI agents, agent harness a
 
 # 🔥 News
 
-- *2026.10*: Extended [TinyTensor](https://github.com/csxq0605/pku-aiprogramming), my course-built CUDA framework, to train ViT-Tiny and ResNets on ImageNet64 on an A100, side by side with PyTorch.
 - *2026.06*: Joined **Hangzhou Yuanxi Technology** as an independent project lead and one of the startup's first technical team members.
 - *2026.05 - now*: Contributing to [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent/pull/4298), from a Core–Adapter architecture and session-scoped fallback protocol to ongoing work on the monorepo refactor.
 - *2026.03*: Joined the **AI + Fusion Energy Series Project** at Peking University.
