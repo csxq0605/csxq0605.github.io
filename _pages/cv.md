@@ -97,7 +97,7 @@ permalink: /cv/
 </style>
 
 <div class="cv-page">
-  <p class="cv-note"><strong>Updated August 2026.</strong> Switch between the synchronized English and Chinese versions below.</p>
+  <p class="cv-note"><strong>Updated October 2026.</strong> Switch between the synchronized English and Chinese versions below.</p>
   <div class="cv-toolbar">
     <div class="cv-switcher" role="group" aria-label="CV language switcher">
       <button
