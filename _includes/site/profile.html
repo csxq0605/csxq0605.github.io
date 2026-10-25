@@ -1,0 +1,38 @@
+{% assign home = site.data.explore.home %}
+<aside class="profile" aria-label="Profile">
+  <div class="profile__inner">
+    <div class="profile__identity">
+      <img class="profile__avatar" src="{{ site.author.avatar | relative_url }}" alt="Wangjie Su" width="96" height="96">
+      <div>
+        <h1 class="profile__name">Wangjie Su</h1>
+        <p class="profile__alias">Bjergsen</p>
+        <p class="profile__affiliation">Peking University</p>
+      </div>
+    </div>
+    <p class="profile__field">Theoretical &amp; Applied Mechanics<br>Intelligent Science &amp; Technology</p>
+    <ul class="profile__links">
+      <li><a href="mailto:{{ site.author.email }}">Email</a></li>
+      <li><a href="https://github.com/{{ site.author.github }}">GitHub</a></li>
+      <li><a href="{{ '/cv/' | relative_url }}">CV</a></li>
+    </ul>
+    <p class="profile__status"><span class="status-dot" aria-hidden="true"></span>Open to internships</p>
+    <p class="profile__clock">{{ site.author.location }}<time data-clock>—</time></p>
+
+    <div class="profile__extras">
+      <p class="eyebrow">Off the main page</p>
+      <a class="extra extra--map" href="{{ '/explore/' | relative_url }}">
+        <span class="mini-map" aria-hidden="true"><i class="mini-map__pin" style="left: {{ home.lng | plus: 180 | divided_by: 3.6 }}%; top: {{ 84 | minus: home.lat | divided_by: 1.44 }}%"></i></span>
+        <strong>World notebook {% include site/icon.html name='arrow' %}</strong>
+        <span>Footprints and visitors</span>
+      </a>
+      <a class="extra" href="{{ '/explore/#oscillator' | relative_url }}">
+        <strong>A little mechanics {% include site/icon.html name='arrow' %}</strong>
+        <span>A spring, a damper, a slider</span>
+      </a>
+      <a class="extra" href="{{ '/test/' | relative_url }}">
+        <strong>Which MUNer are you? {% include site/icon.html name='arrow' %}</strong>
+        <span>A 31-question quiz, in Chinese</span>
+      </a>
+    </div>
+  </div>
+</aside>

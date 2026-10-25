@@ -1,0 +1,39 @@
+{% assign gc_site = site.data.analytics.goatcounter_site | strip %}
+<section class="card" id="world" aria-labelledby="world-title" data-world
+  {% if gc_site != "" %}data-visitors-url="https://raw.githubusercontent.com/{{ site.repository }}/visitor-stats/visitor-atlas.json"{% endif %}>
+  <div class="card__head">
+    <div>
+      <h2 id="world-title">World notebook</h2>
+      <p class="card__note">Two maps on one page: the places I have been, and the countries this site has been read from.</p>
+    </div>
+    <span class="badge" data-demo-badge hidden>EXAMPLE DATA</span>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Map view">
+    <button type="button" role="tab" id="tab-footprints" aria-controls="world-panel" aria-selected="true" data-view="footprints">My footprints</button>
+    <button type="button" role="tab" id="tab-visitors" aria-controls="world-panel" aria-selected="false" tabindex="-1" data-view="visitors">Visitors</button>
+  </div>
+
+  <div class="world" id="world-panel" role="tabpanel" aria-labelledby="tab-footprints">
+    <div>
+      <div class="world__map">
+        <span class="world__land" aria-hidden="true"></span>
+        <div class="world__pins" data-pins></div>
+      </div>
+      <div class="chips" data-chips></div>
+    </div>
+    <div class="world__side">
+      <dl class="metrics" data-metrics>
+        <div><dt>Places</dt><dd>1</dd></div>
+        <div><dt>Countries / regions</dt><dd>1</dd></div>
+      </dl>
+      <div>
+        <p class="world__note" data-note>Based in Beijing.</p>
+        <p class="world__detail" data-detail aria-live="polite"></p>
+        <button class="text-button" type="button" data-demo hidden>Preview with example data</button>
+      </div>
+    </div>
+  </div>
+  <p class="world__caption" data-caption>Markers sit at city or country centres. Visitor counts are per country; no IP addresses are stored or shown.</p>
+  <script type="application/json" data-world-data>{{ site.data.explore | jsonify }}</script>
+</section>

@@ -1,0 +1,28 @@
+<dialog class="search" id="site-search" aria-label="Search this site">
+  <form method="dialog" class="search__form" role="search">
+    <label class="visually-hidden" for="site-search-input">Search sections, projects and pages</label>
+    {% include site/icon.html name='search' %}
+    <input id="site-search-input" type="search" autocomplete="off" spellcheck="false" placeholder="Search sections, projects, pages…" aria-controls="site-search-results">
+    <kbd>Esc</kbd>
+  </form>
+  <div class="search__results" id="site-search-results">
+    <p class="eyebrow">Homepage</p>
+    <a href="{{ '/#about-me' | relative_url }}" data-search-item data-keywords="about me introduction bio 个人 介绍 关于">About me<span>Introduction</span></a>
+    <a href="{{ '/#research-interest' | relative_url }}" data-search-item data-keywords="research interest agents harness scientific embodied 研究">Research interest<span>Agents, scientific workflows, embodied AI</span></a>
+    <a href="{{ '/#news' | relative_url }}" data-search-item data-keywords="news recent 近况 新闻">News<span>Recent updates</span></a>
+    <a href="{{ '/#education' | relative_url }}" data-search-item data-keywords="education peking university gpa 教育 北京大学">Education<span>Peking University</span></a>
+    <a href="{{ '/#experience' | relative_url }}" data-search-item data-keywords="experience internship research lab manyselves yuanxi fusion combustion 经历 实习">Experience<span>Research and engineering</span></a>
+    <a href="{{ '/#projects' | relative_url }}" data-search-item data-keywords="projects 项目">Projects<span>All three write-ups</span></a>
+    <a href="{{ '/#honors-and-awards' | relative_url }}" data-search-item data-keywords="honors awards scholarship 荣誉 奖学金">Honors<span>Scholarships and competitions</span></a>
+    <p class="eyebrow">Repositories</p>
+    {% for project in site.data.projects %}
+    <a href="{{ project.url }}" target="_blank" rel="noopener" data-search-item data-keywords="{{ project.keywords }} github repository 仓库">{{ project.name }}<span>{{ project.note }} · GitHub</span></a>
+    {% endfor %}
+    <p class="eyebrow">Pages</p>
+    <a href="{{ '/cv/' | relative_url }}" data-search-item data-keywords="cv resume 简历 pdf">CV<span>English and Chinese PDF</span></a>
+    <a href="{{ '/explore/' | relative_url }}" data-search-item data-keywords="explore world map visitors footprints travel 地图 访客 足迹">World notebook<span>Footprints and visitors</span></a>
+    <a href="{{ '/explore/#oscillator' | relative_url }}" data-search-item data-keywords="mechanics spring damping oscillator physics 力学 弹簧 阻尼">A little mechanics<span>Damped oscillator you can play with</span></a>
+    <a href="{{ '/test/' | relative_url }}" data-search-item data-keywords="mun model united nations quiz test personality 模联 测试">MUNer personality test<span>31 questions, in Chinese</span></a>
+    <p class="search__empty" data-search-empty hidden>No matches. Try “CV”, “Nexgent” or “地图”.</p>
+  </div>
+</dialog>

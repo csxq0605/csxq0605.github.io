@@ -1,0 +1,14 @@
+# Shown in the header Projects menu, the mobile menu and quick search.
+# The full project write-ups live in _pages/about.md.
+- name: Nexgent
+  note: Desktop agent team that learns
+  url: https://github.com/csxq0605/Nexgent
+  keywords: agent desktop coordinator typescript electron
+- name: Tiny PyTorch
+  note: CUDA deep-learning framework
+  url: https://github.com/csxq0605/pku-aiprogramming
+  keywords: cuda pytorch autodiff tinytensor deep learning
+- name: Where Is My Codex
+  note: Fluid-puzzle game in Taichi
+  url: https://github.com/csxq0605/where-is-my-codex
+  keywords: flow rescue fluid taichi game graphics

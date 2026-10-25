@@ -1,0 +1,29 @@
+# Data for the world notebook on /explore/.
+#
+# home: where I am based (always shown).
+# travel: places I have been. Add entries like:
+#   - name: Kyoto
+#     country: Japan
+#     code: JP            # ISO 3166-1 alpha-2, used to count countries / regions
+#     lat: 35.01
+#     lng: 135.77
+#     year: 2025          # optional
+home:
+  name: Beijing
+  country: China
+  code: CN
+  lat: 39.90
+  lng: 116.41
+travel: []
+
+# Illustrative visitor numbers, shown only after "Preview with example data"
+# and always labelled as examples. They are not real visits.
+example_visitors:
+  - { name: China, code: CN, lat: 35.86, lng: 104.20, visits: 312 }
+  - { name: United States, code: US, lat: 38.00, lng: -97.00, visits: 128 }
+  - { name: Germany, code: DE, lat: 51.00, lng: 9.00, visits: 74 }
+  - { name: United Kingdom, code: GB, lat: 54.00, lng: -2.00, visits: 53 }
+  - { name: Japan, code: JP, lat: 36.00, lng: 138.00, visits: 48 }
+  - { name: Canada, code: CA, lat: 60.00, lng: -95.00, visits: 31 }
+  - { name: Australia, code: AU, lat: -27.00, lng: 133.00, visits: 26 }
+  - { name: Brazil, code: BR, lat: -10.00, lng: -55.00, visits: 17 }
