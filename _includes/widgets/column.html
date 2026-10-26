@@ -4,5 +4,5 @@
     {%- capture path -%}widgets/{{ w }}.html{%- endcapture -%}
     {% include {{ path }} %}
   {%- endfor -%}
-  <script type="application/json" id="widget-data">{"calendar": {{ site.data.calendar | jsonify }}, "poems": {{ site.data.poems | jsonify }}, "activity": {{ site.data.github_activity | jsonify }}}</script>
+  <script type="application/json" id="widget-data">{"calendar": {{ site.data.calendar | jsonify }}, "activity": {{ site.data.github_activity | jsonify }}}</script>
 </aside>

@@ -3,7 +3,6 @@
 (function () {
   'use strict';
   var TZ = 'Asia/Shanghai';
-  var BEIJING = { lat: 39.9042, lng: 116.4074 };
   var DAY = 864e5;
   var dataEl = document.getElementById('widget-data');
   var data = {};
@@ -81,65 +80,6 @@
     }
     render();
     window.setInterval(render, 60000);
-  }());
-
-  /* Poem: one per day, seasonal lines preferred; "换一句" for another --- */
-  var poem = document.querySelector('[data-widget-poem]');
-  if (poem && Array.isArray(data.poems) && data.poems.length) (function () {
-    var poems = data.poems;
-    var bj = beijingParts(new Date());
-    var season = bj.m >= 3 && bj.m <= 5 ? 'spring' : bj.m >= 6 && bj.m <= 8 ? 'summer' : bj.m >= 9 && bj.m <= 11 ? 'autumn' : 'winter';
-    var seasonal = poems.filter(function (p) { return p.season === season; });
-    var dayNumber = Math.floor(isoToUTC(bj.iso) / DAY);
-    // Every other day a seasonal line, otherwise any line; deterministic per day.
-    var pool = seasonal.length && dayNumber % 2 === 0 ? seasonal : poems;
-    var index = poems.indexOf(pool[dayNumber % pool.length]);
-    function show(i) {
-      var p = poems[i];
-      set(poem, '[data-poem-text]', p.text);
-      set(poem, '[data-poem-source]', p.author + '《' + p.title + '》');
-    }
-    show(index);
-    var button = $(poem, '[data-poem-next]');
-    button.hidden = false;
-    button.addEventListener('click', function () {
-      var next = index;
-      while (next === index && poems.length > 1) next = Math.floor(Math.random() * poems.length);
-      index = next;
-      show(index);
-    });
-  }());
-
-  /* Sky: moon phase and Beijing sunrise/sunset (SunCalc) ------------- */
-  var sky = document.querySelector('[data-widget-sky]');
-  if (sky && window.SunCalc) (function () {
-    var fmt = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-    function name(phase) {
-      var names = ['新月', '蛾眉月', '上弦月', '盈凸月', '满月', '亏凸月', '下弦月', '残月'];
-      return names[Math.round(phase * 8) % 8];
-    }
-    function moonPath(phase) {
-      // Lit part of a disc of radius 46: outer half-circle + terminator ellipse.
-      var r = 46, k = Math.cos(phase * 2 * Math.PI) * r;   // terminator x-radius (signed)
-      var waxing = phase < 0.5;
-      var outer = waxing ? 1 : 0;                           // lit limb on the right while waxing
-      var gibbous = phase > 0.25 && phase < 0.75;           // terminator bulges away from the lit limb
-      var inner = gibbous ? outer : 1 - outer;
-      return 'M0,' + (-r) + ' A' + r + ',' + r + ' 0 0,' + outer + ' 0,' + r + ' A' + Math.abs(k).toFixed(2) + ',' + r + ' 0 0,' + inner + ' 0,' + (-r) + ' Z';
-    }
-    function render() {
-      var now = new Date();
-      var m = SunCalc.getMoonIllumination(now);
-      $(sky, '[data-moon-lit]').setAttribute('d', moonPath(m.phase));
-      set(sky, '[data-moon-name]', name(m.phase) + ' · 照亮 ' + Math.round(m.fraction * 100) + '%');
-      var t = SunCalc.getTimes(now, BEIJING.lat, BEIJING.lng);
-      set(sky, '[data-sunrise]', '日出 ' + fmt.format(t.sunrise));
-      set(sky, '[data-sunset]', '日落 ' + fmt.format(t.sunset));
-      var len = Math.round((t.sunset - t.sunrise) / 60000);
-      set(sky, '[data-daylen]', '白昼 ' + Math.floor(len / 60) + ' 小时 ' + (len % 60) + ' 分');
-    }
-    render();
-    window.setInterval(render, 10 * 60000);
   }());
 
   /* GitHub activity heatmap (data from the weekly workflow) ---------- */

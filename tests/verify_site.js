@@ -115,13 +115,15 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     assert.strictEqual(await today.locator('[data-next]').textContent(), '元旦 · 67 天后');
     assert.strictEqual(await today.locator('[data-year-pct]').textContent(), '81.8%');
     assert.match(await p.locator('[data-greeting]').textContent(), /^Good morning · 早上好 — You are 8 hours behind Beijing\.$/);
-    assert.match(await p.locator('[data-moon-name]').textContent(), /^满月 · 照亮 (99|100)%$/);
-    assert.strictEqual(await p.locator('[data-sunrise]').textContent(), '日出 06:36');
-    assert.strictEqual(await p.locator('[data-sunset]').textContent(), '日落 17:22');
-    const first = await p.locator('[data-poem-text]').textContent();
-    await p.locator('[data-poem-next]').click();
-    assert.notStrictEqual(await p.locator('[data-poem-text]').textContent(), first);
     assert.ok((await p.locator('.heatmap__cell').count()) >= 134);
+    assert.strictEqual(await p.locator('[data-widget-poem], [data-widget-sky]').count(), 0);
+    // The world map lives on the homepage too.
+    await p.locator('.widget--explore a[href="/#world"]').click();
+    await p.waitForFunction(() => location.hash === '#world');
+    assert.strictEqual(await p.locator('#world .pin').count(), 1);
+    await p.getByRole('tab', { name: 'Visitors' }).click();
+    await p.locator('#world [data-demo]').click();
+    assert.deepStrictEqual(await p.locator('#world [data-metrics] dd').allTextContents(), ['689', '8']);
     const pond = await p.locator('.pond__canvas').boundingBox();
     assert.ok(pond.width > 200 && pond.height >= 80);
     await p.mouse.click(pond.x + pond.width / 2, pond.y + pond.height / 2);
@@ -131,7 +133,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     }
     assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     assert.deepStrictEqual(p.errors, []);
-    console.log(`PASS widgets ${width}px: calendar, solar term, festival, greeting, moon, sun, poem, heatmap, pond`);
+    console.log(`PASS widgets ${width}px: calendar, solar term, festival, greeting, heatmap, world map, pond`);
     await p.context().close();
   }
 

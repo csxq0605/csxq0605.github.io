@@ -1,10 +1,10 @@
 # Widgets in the left column of the homepage, top to bottom.
-# Remove a line to hide that widget. Available: today, poem, sky, activity, explore
+# Remove a line to hide that widget. Available: today, activity, explore
 sidebar:
   - today
-  - poem
-  - sky
   - activity
   - explore
+# Interactive world map (footprints / visitors) across the bottom of the homepage
+world: true
 # Fish pond above the footer: true or false
 pond: true
