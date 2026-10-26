@@ -27,7 +27,8 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     assert.deepStrictEqual(await p.locator('.home__main > h2').evaluateAll(hs => hs.map(h => h.id)), SECTIONS);
     assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'horizontal overflow at ' + width);
     assert.deepStrictEqual(await p.locator('.card-project__repo').evaluateAll(as => as.map(a => a.href)), REPOS);
-    assert.ok((await p.locator('.pub').count()) >= 1);
+    assert.strictEqual(await p.locator('.pub').count(), 0);
+    assert.strictEqual(await p.locator('.pub-empty').textContent(), 'No publications yet.');
     assert.strictEqual(await p.locator('script[data-goatcounter]').count(), 0);
 
     if (width > 1140) {
@@ -93,13 +94,8 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     await p.waitForSelector('#project-drawer[open]');
     assert.strictEqual(await p.locator('[data-drawer-title]').textContent(), 'Where Is My Codex');
     await p.locator('[data-drawer-close]').click();
-    await p.locator('.pub__cite').first().click();
-    const bib = await p.evaluate(() => navigator.clipboard.readText());
-    assert.match(bib, /^@techreport\{su2026tinypytorch,/);
-    assert.match(bib, /author = \{Wangjie Su\}/);
-    assert.strictEqual(await p.locator('.pub__cite').first().textContent(), 'BibTeX copied');
     assert.deepStrictEqual(p.errors, []);
-    console.log(`PASS cards ${width}px: README panel, deep link, close, Cite copies BibTeX`);
+    console.log(`PASS cards ${width}px: README panel, deep link, close`);
     await p.context().close();
   }
 

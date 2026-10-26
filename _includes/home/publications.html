@@ -1,9 +1,11 @@
 {%- assign pubs = site.data.publications -%}
-<p class="pub-intro">No peer-reviewed papers yet — below are the technical write-ups behind my work. Papers and preprints will be listed here first.</p>
+{%- if pubs == empty or pubs.size == 0 -%}
+<p class="pub-empty">No publications yet.</p>
+{%- else -%}
 <ol class="pubs" reversed>
   {%- for pub in pubs %}
   <li class="pub" id="pub-{{ pub.key }}">
-    <div class="pub__meta"><span class="pub__type pub__type--{{ pub.type | slugify }}">{{ pub.type }}</span><span class="pub__year">{{ pub.year }}</span></div>
+    <div class="pub__meta">{% if pub.status == "accepted" %}<span class="pub__type pub__type--accepted">accepted</span>{% endif %}<span class="pub__year">{{ pub.year }}</span></div>
     <h3 class="pub__title">{{ pub.title }}</h3>
     <p class="pub__authors">{% for a in pub.authors %}{% if a == "Wangjie Su" %}<strong>{{ a }}</strong>{% else %}{{ a }}{% endif %}{% unless forloop.last %}, {% endunless %}{% endfor %} · <span>{{ pub.venue }}</span></p>
     {% if pub.note %}<p class="pub__note">{{ pub.note }}</p>{% endif %}
@@ -11,7 +13,7 @@
       {%- for link in pub.links %}<a href="{{ link[1] }}" target="_blank" rel="noopener">{{ link[0] }}{% include site/icon.html name='external' %}</a>{% endfor -%}
       {%- capture bib -%}
 {%- if pub.bibtex -%}{{ pub.bibtex | strip }}{%- else -%}
-{%- assign kind = "misc" -%}{%- if pub.type == "technical report" -%}{%- assign kind = "techreport" -%}{%- elsif pub.type == "paper" -%}{%- assign kind = "inproceedings" -%}{%- endif -%}
+{%- assign kind = pub.bibtype | default: "inproceedings" -%}
 @{{ kind }}{ {{- pub.key -}},
   title = { {{- pub.title -}} },
   author = { {{- pub.authors | join: " and " -}} },
@@ -26,3 +28,4 @@
   </li>
   {%- endfor %}
 </ol>
+{%- endif -%}

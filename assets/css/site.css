@@ -397,7 +397,7 @@ summary::-webkit-details-marker { display: none; }
 .prose a.repo-link:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
 
 /* Publications */
-.site .pub-intro { margin: 0 0 22px; font-size: 14px; color: var(--muted); }
+.site .pub-empty { margin: 0; padding: 18px 20px; border: 1px dashed var(--line-strong); border-radius: 10px; font-size: 14px; color: var(--muted); }
 .prose .pubs { list-style: none; padding: 0; margin: 0; }
 .prose .pub { padding: 0 0 22px; margin: 0 0 22px; border-bottom: 1px dashed var(--line-strong); }
 .prose .pub::before { display: none; }
@@ -408,7 +408,7 @@ summary::-webkit-details-marker { display: none; }
   padding: 2px 8px; border-radius: 4px; background: var(--sunken); color: var(--muted);
   font: 500 11px/1.5 var(--mono); letter-spacing: .04em; text-transform: uppercase;
 }
-.pub__type--paper, .pub__type--preprint { background: var(--accent-soft); color: var(--accent-ink); }
+.pub__type--accepted { background: var(--accent-soft); color: var(--accent-ink); }
 .pub__year { font: 12px var(--mono); color: var(--faint); }
 .prose .pub__title { margin: 0 0 4px; font: 500 19px/1.3 var(--serif); letter-spacing: -.005em; color: var(--ink); }
 .prose .pub__authors { margin: 0 0 4px; font-size: 14px; color: var(--muted); }
