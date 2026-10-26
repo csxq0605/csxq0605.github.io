@@ -117,7 +117,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     await p.locator('.widget--explore a[href="/#world"]').click();
     await p.waitForFunction(() => location.hash === '#world');
     await p.waitForSelector('#world [data-layer="world"] path');
-    assert.deepStrictEqual(await p.locator('#world [data-layer="world"] path.is-visited').evaluateAll(ps => ps.map(x => x.dataset.id).sort()), ['CN', 'JP', 'MY', 'SG', 'US']);
+    assert.deepStrictEqual(await p.locator('#world [data-layer="world"] path.is-visited').evaluateAll(ps => ps.map(x => x.dataset.id).sort()), ['BE', 'CH', 'CN', 'DE', 'ES', 'FR', 'GB', 'IT', 'JP', 'MY', 'NL', 'SG', 'US']);
     await p.getByRole('tab', { name: 'Visitors' }).click();
     await p.locator('#world [data-demo]').click();
     assert.deepStrictEqual(await p.locator('#world [data-metrics] dd').allTextContents(), ['689', '8']);
@@ -171,7 +171,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     const crumbs = async () => (await p.locator('[data-crumbs]').innerText()).replace(/\s+/g, ' ').trim();
     const viewBox = async () => (await p.locator('[data-map]').getAttribute('viewBox')).split(' ').map(Number);
     await p.waitForSelector('[data-layer="world"] path');
-    assert.deepStrictEqual(await texts(p, '[data-metrics] dd'), ['8', '22 / 34', '77', '3.2%']);
+    assert.deepStrictEqual(await texts(p, '[data-metrics] dd'), ['16', '22 / 34', '77', '6.4%']);
     assert.strictEqual(await crumbs(), 'World');
     const worldView = await viewBox();
     // Kashmir is drawn uncoloured; the South China Sea dashed line is present.
@@ -235,6 +235,14 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region.is-whole').count(), 0);
     await p.locator('.chip', { hasText: 'Osaka' }).click();
     assert.ok(await p.locator('[data-inset]').isHidden(), 'no city window outside China');
+    // A country without divisions listed zooms to its mainland (France, not French Guiana).
+    await p.locator('[data-crumbs] button', { hasText: 'World' }).click();
+    await p.locator('.chip', { hasText: 'France' }).click();
+    assert.strictEqual(await crumbs(), 'World › France');
+    const fr = await viewBox();
+    assert.ok(fr[0] > 400 && fr[2] < 120, 'framed on mainland France: ' + fr);
+    assert.match(await p.locator('[data-note]').textContent(), /Visited France/);
+    assert.strictEqual(await p.locator('[data-layer="world"] path[data-id="FR"]').count(), 1, 'one shape per country code');
     assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     // Visitors: switching tabs returns to the world view.
     await p.getByRole('tab', { name: 'Visitors' }).click();

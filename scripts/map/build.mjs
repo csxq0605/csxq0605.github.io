@@ -75,6 +75,20 @@ function rewind(feature) {
 }
 
 const r = n => Math.round(n * 10) / 10;
+// Frame for zooming to a country: its main landmass and the land near it, leaving
+// out far-off territories such as French Guiana for France. Keeps polygons whose
+// centre lies within 1.5 times the size of the largest polygon from its centre.
+function focusBox(pathGen, feature) {
+  const g = feature.geometry;
+  if (!g || g.type !== 'MultiPolygon') return box(pathGen, feature);
+  const polys = g.coordinates.map(c => ({ type: 'Polygon', coordinates: c }));
+  const main = polys.reduce((a, p) => (geoArea(p) > geoArea(a) ? p : a));
+  const [[x0, y0], [x1, y1]] = pathGen.bounds(main);
+  const reach = 1.5 * Math.hypot(x1 - x0, y1 - y0);
+  const [cx, cy] = pathGen.centroid(main);
+  const near = polys.filter(p => { const [x, y] = pathGen.centroid(p); return Math.hypot(x - cx, y - cy) <= reach; });
+  return box(pathGen, { type: 'Feature', geometry: { type: 'MultiPolygon', coordinates: near.map(p => p.coordinates) } });
+}
 function box(pathGen, feature) {
   const [[x0, y0], [x1, y1]] = pathGen.bounds(feature);
   return [r(x0), r(y0), r(x1), r(y1)];
@@ -128,13 +142,21 @@ async function main() {
   const [[, top], [, bottom]] = worldPath.bounds(world);
   const height = Math.ceil(bottom - Math.min(0, top));
   const proj = { scale: projection.scale(), translate: projection.translate() };
+  // A few minor territories share their country's ISO code (Clipperton Island is
+  // "FR"); the largest feature keeps the code, the others use their adm0_a3.
+  const owner = {};
+  for (const f of world.features) {
+    const iso = f.properties.ISO_A2_EH;
+    if (iso && iso !== '-99' && (!owner[iso] || geoArea(f) > geoArea(owner[iso]))) owner[iso] = f;
+  }
   const countries = world.features.map(f => {
     const iso = f.properties.ISO_A2_EH;
     return {
-      id: iso && iso !== '-99' ? iso : f.properties.ADM0_A3,
+      id: owner[iso] === f ? iso : f.properties.ADM0_A3,
       name: f.properties.NAME,
       d: worldPath(f),
       box: box(worldPath, f),
+      focus: focusBox(worldPath, f),
       area: Math.round(geoArea(f) * 1e6),
       c: worldPath.centroid(f).map(r),
     };

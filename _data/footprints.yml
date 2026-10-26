@@ -165,6 +165,14 @@ countries:
       - { id: MY-04, name: Melaka }
       - { id: MY-12, name: Sabah }
   - { code: SG, name: Singapore }
+  - { code: GB, name: United Kingdom }
+  - { code: FR, name: France }
+  - { code: BE, name: Belgium }
+  - { code: NL, name: Netherlands }
+  - { code: DE, name: Germany }
+  - { code: CH, name: Switzerland }
+  - { code: IT, name: Italy }
+  - { code: ES, name: Spain }
   - code: US
     name: United States
     regions:

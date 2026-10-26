@@ -468,7 +468,7 @@
       (state.demo ? examples : visitors.regions).slice().sort(function (a, b) { return b.visits - a.visits; }).forEach(function (r) {
         chip(r.name, fmt(r.visits), function () {
           var c = world.countries.filter(function (x) { return x.id === (MAP_ID[r.code] || r.code); })[0];
-          if (c) animateTo(fitBox(c.box, 0.6));
+          if (c) animateTo(fitBox(c.focus || c.box, 0.6));
         });
       });
       return;
@@ -504,8 +504,8 @@
     closeInsetOnly();
     if (!LAYERS[code]) {
       layer = null;
-      home_view = { box: c.box, pad: 0.8 };
-      animateTo(fitBox(c.box, 0.8));
+      home_view = { box: c.focus || c.box, pad: 0.3 };
+      animateTo(fitBox(home_view.box, 0.3));
       render();
       return;
     }
@@ -521,8 +521,8 @@
         if (shape) openProvince(shape);
       }
     }).catch(function () {
-      home_view = { box: c.box, pad: 0.1 };
-      animateTo(fitBox(c.box, 0.1));
+      home_view = { box: c.focus || c.box, pad: 0.1 };
+      animateTo(fitBox(home_view.box, 0.1));
       render();
     }).then(function () { $('[data-loading]').hidden = true; });
   }
