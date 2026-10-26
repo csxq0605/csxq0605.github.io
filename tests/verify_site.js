@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
 const assert = require('assert');
 const base = (process.argv[2] || 'http://127.0.0.1:4100').replace(/\/$/, '');
 const SECTIONS = ['about-me', 'research-interest', 'news', 'education', 'experience', 'publications', 'projects', 'honors-and-awards'];
-const REPOS = ['https://github.com/csxq0605/Nexgent', 'https://github.com/csxq0605/pku-aiprogramming', 'https://github.com/csxq0605/where-is-my-codex'];
+const REPOS = ['https://github.com/csxq0605/Nexgent', 'https://github.com/csxq0605/manyselves', 'https://github.com/csxq0605/pku-aiprogramming', 'https://github.com/csxq0605/where-is-my-codex'];
 
 async function page(browser, width, opts = {}) {
   const ctx = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce', ...opts });
@@ -80,7 +80,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
   for (const width of [1440, 390]) {
     const p = await page(browser, width, { permissions: ['clipboard-read', 'clipboard-write'] });
     await p.goto(base + '/#projects', { waitUntil: 'networkidle' });
-    await p.locator('.card-project').nth(1).click();
+    await p.locator('.card-project').nth(2).click();
     await p.waitForSelector('#project-drawer[open]');
     assert.strictEqual(await p.locator('[data-drawer-title]').textContent(), 'Tiny PyTorch');
     assert.ok(await p.locator('[data-drawer-body] .readme').count());
@@ -144,22 +144,20 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     assert.deepStrictEqual(visibleDates, ['Jun – Sep 2026', 'Mar 2026 – Present', 'May 2025 – Present']);
     const spokenDates = await exp.locator('.tl-date').evaluateAll(ps => ps.map(p => { const c = p.cloneNode(true); c.querySelectorAll('[aria-hidden]').forEach(n => n.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); }));
     assert.deepStrictEqual(spokenDates, ['Jun to Sep 2026', 'Mar 2026 to Present', 'May 2025 to Present']);
-    assert.strictEqual(await exp.locator('details.tl-more').count(), 1);
-    assert.strictEqual(await exp.locator('.tl-more summary').textContent(), 'How ManySelves works');
+    assert.strictEqual(await exp.locator('details.tl-more').count(), 0);
+    // The ManySelves link in Experience opens its project card.
+    await exp.locator('a[href="/#project-manyselves"]').click();
+    await p.waitForSelector('#project-drawer[open]');
+    assert.strictEqual(await p.locator('[data-drawer-title]').textContent(), 'ManySelves');
+    assert.match(await p.locator('[data-drawer-body] .project-overview').textContent(), /recoverable local runtime for file-defined agent teams/);
+    await p.locator('[data-drawer-close]').click();
     assert.match(await exp.locator('.tl-summary').nth(1).textContent(), /four layers/);
-    assert.ok(!(await exp.locator('.tl-details').first().isVisible()));
-    await exp.locator('.tl-more summary').first().click();
-    assert.match(await exp.locator('.tl-details').first().textContent(), /recoverable local runtime for file-defined agent teams/);
     assert.match(await exp.locator('.tl-people').first().textContent(), /^PIs: Prof\. Yunfeng Liang, Prof\. Songfang Huang$/);
     assert.strictEqual(await p.locator('#education + .timeline .tl-item').count(), 2);
     assert.strictEqual(await p.locator('#education + .timeline .is-current').count(), 0);
     assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-    // Browser find-in-page and print still reach collapsed text.
-    await p.emulateMedia({ media: 'print' });
-    await p.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
-    assert.strictEqual(await exp.locator('details.tl-more[open]').count(), 1);
     assert.deepStrictEqual(p.errors, []);
-    console.log('PASS timeline: education and experience entries, dates, PIs, details toggle, print opens all');
+    console.log('PASS timeline: education and experience entries, dates, PIs, ManySelves link opens its card');
     await p.context().close();
   }
 
@@ -260,7 +258,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     await p.goto(base + '/', { waitUntil: 'networkidle' });
     await p.locator('.compact-menu summary').click();
     assert.strictEqual(await p.locator('.compact-menu__sections a').count(), 8);
-    assert.strictEqual(await p.locator('.card-project').count(), 3);
+    assert.strictEqual(await p.locator('.card-project').count(), 4);
     await p.locator('.card-project__name a').first().click();
     await p.waitForURL('**/projects/nexgent/');
     assert.ok(await p.locator('.readme').isVisible());

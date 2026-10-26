@@ -7,10 +7,7 @@
   org: Hangzhou Yuanxi Technology
   start: 2026-06-01
   end: 2026-09-01
-  summary: Contributed end to end across the frontend, backend, and runtime of [ManySelves](https://github.com/csxq0605/manyselves), independently designing and implementing its runtime kernel and capability packages.
-  more_label: How ManySelves works
-  details: |
-    ManySelves is a recoverable local runtime for file-defined agent teams: identities, skills, tasks, contracts, and workflows are declared in Markdown, YAML, and JSON Schema, compiled into a frozen plan, and executed by a stateless kernel. Its bundled power-distribution safety reporting capability splits work so that code handles structure (grouping, citations, gap classification, reconciliation, assembly) while the model makes the professional judgments in a judgment ledger, and revisions produce a new version under the same run, reopening only the modules whose facts changed.
+  summary: Contributed end to end across the frontend, backend, and runtime of [ManySelves](/#project-manyselves), independently designing and implementing its runtime kernel and capability packages.
 - role: Undergraduate Researcher
   org: AI + Fusion Energy Series Project, Xinao Technology Innovation Center, Peking University
   start: 2026-03-01
