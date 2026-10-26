@@ -25,7 +25,7 @@ Source of **<https://csxq0605.github.io>**, the personal homepage of Wangjie Su 
 | 经历（摘要始终显示，`details` 可折叠） | `_data/experience.yml` |
 | 论文（只放已发表的学术论文；Cite 按钮自动生成 BibTeX） | `_data/publications.yml` |
 | 项目卡片、顶部 Projects 菜单、搜索里的项目 | `_data/projects.yml` |
-| 去过的地方（城市级） | `_data/explore.yml` 的 `travel:` |
+| 去过的地方（国家 → 省份 → 城市） | `_data/footprints.yml`（文件开头有写法说明） |
 | 侧栏小组件的开关与顺序、世界地图、鱼塘 | `_data/widgets.yml` |
 | 简历 PDF | `assets/cv/` |
 | 姓名、邮箱、GitHub、头像等 | `_config.yml` 的 `author:` |
@@ -57,6 +57,12 @@ python3 -m http.server 4100 --directory _site &     # 先 bundle exec jekyll bui
 node tests/verify_site.js http://127.0.0.1:4100     # 页面与交互（需要 playwright）
 ```
 
+足迹地图的形状数据在 `assets/data/map/`，由脚本预先生成，网页运行时不加载任何外部地图服务。中国 34 个省级行政区的城市底图都已生成，所以在 `_data/footprints.yml` 里加省份、加城市不需要重新生成；只有给新的国家加省／州一级图层时才需要：
+
+```bash
+cd scripts/map && npm install && npm run build   # 生成 assets/data/map/*.json
+```
+
 ## 文档
 
 - [`docs/homepage-design.md`](docs/homepage-design.md)：视觉与导航的设计说明
@@ -67,5 +73,6 @@ node tests/verify_site.js http://127.0.0.1:4100     # 页面与交互（需要 p
 
 - 最初基于 [AcadHomepage](https://github.com/RayeRen/acad-homepage.github.io)（Yi Ren，MIT 许可，见 [`LICENSE`](LICENSE)）。AcadHomepage 本身受 [minimal-mistakes](https://github.com/mmistakes/minimal-mistakes) 与 [academicpages](https://github.com/academicpages/academicpages.github.io)（均为 MIT）启发，并包含 Font Awesome（SIL OFL 1.1 / MIT）。
 - 标题字体 [Newsreader](https://github.com/google/fonts/tree/main/ofl/newsreader)（SIL OFL 1.1，见 `assets/fonts/newsreader/OFL.txt`）。
-- 世界地图源自 [world-atlas](https://github.com/topojson/world-atlas) / Natural Earth（公有领域）；国家中心坐标源自 [mledoze/countries](https://github.com/mledoze/countries)（ODbL）。
+- 足迹地图：世界与各国省／州边界来自 [Natural Earth](https://www.naturalearthdata.com/)（公有领域，采用其中国视角版本）；中国省级、地级边界和南海断续线来自 [DataV GeoAtlas](https://datav.aliyun.com/portal/school/atlas/area_selector)（高德地图数据，仅供学习和交流使用）。台湾作为省级行政区、港澳作为特别行政区显示，克什米尔不着色。地图仅作示意，未经地图审核。详见 `assets/data/map/LICENSE.md`。
+- 访客统计导出用的国家名称与代码来自 [mledoze/countries](https://github.com/mledoze/countries)（ODbL）。
 - 节气与农历节日日期由 [lunar-javascript](https://github.com/6tail/lunar-javascript)（MIT）离线生成，存于 `_data/calendar.json`。

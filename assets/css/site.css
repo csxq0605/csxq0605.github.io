@@ -35,8 +35,15 @@
   --accent-ink: #284d63;
   --accent-soft: #e5edf1;
   --accent-line: rgba(51, 96, 122, .35);
-  --map-land: #d9dad2;
-  --pin-ring: #fbfaf7;
+  --map-sea: #f1f2ee;
+  --map-land: #dcddd5;
+  --map-in: #cfd1c6;
+  --map-edge: #fbfaf7;
+  --map-visited: #8eaebf;
+  --map-whole: #c3d3dc;
+  --map-home: #c27a5c;
+  --map-mark: #33607a;
+  --map-v1: #cddbe2; --map-v2: #9db8c7; --map-v3: #6890a7; --map-v4: #33607a;
   --shadow: 0 14px 34px rgba(38, 45, 48, .1), 0 2px 6px rgba(38, 45, 48, .06);
 
   --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Georgia, "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", serif;
@@ -62,8 +69,15 @@
   --accent-ink: #bcd7e6;
   --accent-soft: #24343d;
   --accent-line: rgba(156, 194, 215, .4);
-  --map-land: #3a454a;
-  --pin-ring: #191e21;
+  --map-sea: #1c2225;
+  --map-land: #364247;
+  --map-in: #43525a;
+  --map-edge: #20272a;
+  --map-visited: #5f8aa1;
+  --map-whole: #445c69;
+  --map-home: #c4805f;
+  --map-mark: #bcd7e6;
+  --map-v1: #3a5361; --map-v2: #52798e; --map-v3: #7aa3ba; --map-v4: #a9cde0;
   --shadow: 0 14px 34px rgba(0, 0, 0, .35), 0 2px 6px rgba(0, 0, 0, .25);
   color-scheme: dark;
 }
@@ -239,20 +253,6 @@ summary::-webkit-details-marker { display: none; }
 .extra:hover strong { color: var(--accent); }
 .extra:hover .icon--arrow { transform: translateX(2px); }
 .icon--arrow { transition: transform .15s ease; }
-.mini-map {
-  position: relative; display: block; margin-bottom: 8px;
-  aspect-ratio: 720 / 288; border-radius: 4px;
-}
-.mini-map::before, .world__land {
-  content: ""; position: absolute; inset: 0;
-  background: var(--map-land);
-  -webkit-mask: url("../images/site/world.svg") center / 100% 100% no-repeat;
-  mask: url("../images/site/world.svg") center / 100% 100% no-repeat;
-}
-.mini-map__pin {
-  position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
-  border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--pin-ring), 0 0 0 5px var(--accent-line);
-}
 
 /* Greeting */
 .site .profile__greeting { margin: 8px 0 0; font-size: 12px; line-height: 1.55; color: var(--muted); }
@@ -543,22 +543,90 @@ summary::-webkit-details-marker { display: none; }
   background: none; cursor: pointer; font-size: 14px; color: var(--muted);
 }
 .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
-.world { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 32px; align-items: start; }
-.world__map { position: relative; aspect-ratio: 720 / 288; }
-.world__pins { position: absolute; inset: 0; }
-.pin {
-  position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; padding: 0;
-  border: 0; border-radius: 50%; background: transparent; cursor: pointer;
+.atlas__body { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 32px; align-items: start; }
+.atlas__stage {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center; gap: 8px 12px; min-width: 0;
 }
-.pin::after {
-  content: ""; position: absolute; left: 50%; top: 50%;
-  width: var(--size, 9px); height: var(--size, 9px); transform: translate(-50%, -50%);
-  border-radius: 50%; background: var(--accent);
-  box-shadow: 0 0 0 2px var(--pin-ring), 0 0 0 5px var(--accent-line);
-  transition: box-shadow .15s ease;
+.atlas__crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; min-height: 32px; font-size: 13px; color: var(--muted); }
+.atlas__crumb { padding: 4px 2px; border: 0; background: none; font: inherit; color: var(--accent); cursor: pointer; }
+button.atlas__crumb { text-decoration: underline; text-decoration-color: var(--accent-line); text-underline-offset: 3px; }
+button.atlas__crumb:hover { text-decoration-color: currentColor; }
+.atlas__crumb.is-current { color: var(--ink); font-weight: 500; }
+.atlas__crumb-sep { color: var(--faint); }
+.atlas__zoom { display: flex; gap: 4px; }
+.atlas__zoom button {
+  width: 32px; height: 32px; padding: 0; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--surface); color: var(--ink); font-size: 16px; line-height: 1; cursor: pointer;
 }
-.pin--home::after { background: #b4583c; box-shadow: 0 0 0 2px var(--pin-ring), 0 0 0 5px rgba(180, 88, 60, .3); }
-.pin:hover::after, .pin[aria-pressed="true"]::after { box-shadow: 0 0 0 2px var(--pin-ring), 0 0 0 8px var(--accent-line); }
+.atlas__zoom button:hover { border-color: var(--accent-line); }
+.atlas__map {
+  grid-column: 1 / -1; display: block; width: 100%; height: auto; aspect-ratio: 2 / 1;
+  border-radius: 10px; background: var(--map-sea);
+  touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none;
+}
+.atlas__map:active { cursor: grabbing; }
+.atlas__map path { vector-effect: non-scaling-stroke; }
+.atlas__map [role="button"]:focus { outline: none; }
+.atlas__map [role="button"]:focus-visible { stroke: var(--ink); stroke-width: 2; }
+.atlas__country { fill: var(--map-land); stroke: var(--map-edge); stroke-width: .6; transition: fill .2s ease, opacity .3s ease; }
+.atlas__country.is-visited { fill: var(--map-visited); cursor: pointer; }
+.atlas__country.is-visited:hover { fill: var(--map-mark); }
+.atlas.is-zoomed .atlas__country { opacity: .45; }
+.atlas.is-zoomed .atlas__country.is-visited { opacity: .7; }
+.atlas__country.v1 { fill: var(--map-v1); }
+.atlas__country.v2 { fill: var(--map-v2); }
+.atlas__country.v3 { fill: var(--map-v3); }
+.atlas__country.v4 { fill: var(--map-v4); }
+.atlas__kashmir { fill: var(--map-sea); stroke: var(--faint); stroke-width: .8; stroke-dasharray: 3 2; }
+.atlas__dash { fill: var(--muted); stroke: var(--muted); stroke-width: .8; }
+.atlas__region { fill: var(--map-in); stroke: var(--map-edge); stroke-width: .8; transition: fill .2s ease; }
+.atlas__region.is-whole { fill: var(--map-whole); }
+.atlas__region.is-visited { fill: var(--map-visited); }
+.atlas__region.is-home { fill: var(--map-home); }
+.atlas__region[role="button"] { cursor: pointer; }
+.atlas__region[role="button"]:hover { fill: var(--map-whole); }
+.atlas__region.is-visited[role="button"]:hover { fill: var(--map-mark); }
+.atlas__region.is-selected { stroke: var(--ink); stroke-width: 1.6; }
+.atlas__mark { cursor: pointer; }
+.atlas__mark-hit { fill: transparent; }
+.atlas__mark-dot { fill: var(--map-mark); stroke: var(--surface); stroke-width: 1.5; }
+.atlas__mark.is-home .atlas__mark-dot { fill: var(--map-home); }
+.atlas__mark:hover .atlas__mark-dot, .atlas__mark:focus-visible .atlas__mark-dot { stroke: var(--ink); }
+.atlas__mark:focus { outline: none; }
+.site .atlas__tip {
+  position: absolute; left: 0; top: 0; z-index: 3; max-width: 240px; margin: 0; padding: 4px 9px;
+  border-radius: 6px; background: var(--ink); color: var(--paper); font-size: 12.5px; line-height: 1.45;
+  pointer-events: none; white-space: nowrap;
+}
+.site .atlas__loading {
+  position: absolute; left: 50%; top: 55%; transform: translate(-50%, -50%);
+  margin: 0; font-size: 13px; color: var(--muted);
+}
+.atlas__tip[hidden], .atlas__loading[hidden], .atlas__inset[hidden] { display: none; }
+.atlas__inset {
+  position: absolute; right: 10px; bottom: 10px; z-index: 2; width: min(260px, 40%);
+  padding: 10px 12px 10px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface); box-shadow: var(--shadow);
+}
+.atlas.inset-left .atlas__inset { right: auto; left: 10px; }
+.atlas__inset-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.site .atlas__inset h3 { margin: 0; font: 500 15px/1.3 var(--serif); color: var(--ink); }
+.atlas__inset .icon-button { width: 28px; height: 28px; min-width: 28px; font-size: 13px; }
+.atlas__inset-map { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; }
+.atlas__part { fill: var(--map-land); stroke: var(--map-edge); stroke-width: .8; vector-effect: non-scaling-stroke; }
+.atlas__part.is-visited { fill: var(--map-visited); }
+.atlas__city { fill: var(--map-mark); stroke: var(--surface); stroke-width: 2; }
+.atlas__city-label {
+  font: 600 17px var(--sans); fill: var(--ink);
+  paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round;
+}
+.site .atlas__inset-note { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+.atlas__inset-list { display: flex; flex-wrap: wrap; gap: 2px 12px; margin: 2px 0 0; padding: 0; list-style: none; font-size: 12.5px; color: var(--ink); }
+.atlas__inset-list span { margin-left: 4px; color: var(--faint); }
+.atlas__side { padding-top: 40px; }
+.site .atlas__credit { margin: 6px 0 0; font-size: 11.5px; color: var(--faint); }
+.atlas__credit a { color: inherit; }
 .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 18px; margin: 0 0 16px; }
 .metrics div { margin: 0; }
 .metrics dt { font-size: 12px; line-height: 1.4; color: var(--muted); margin-top: 4px; }
@@ -566,7 +634,6 @@ summary::-webkit-details-marker { display: none; }
 .metrics div { display: flex; flex-direction: column; }
 .metrics dd { order: -1; }
 .site .world__note { margin: 0 0 10px; font-size: 13.5px; color: var(--muted); }
-.site .world__detail { min-height: 1.5em; margin: 0 0 10px; font-size: 13.5px; color: var(--accent-ink); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; }
 .chip {
   display: inline-flex; gap: 8px; align-items: center;
@@ -679,9 +746,9 @@ summary::-webkit-details-marker { display: none; }
 }
 @media (max-width: 860px) {
   :root { --gutter: 28px; }
-  .world { grid-template-columns: 1fr; gap: 20px; }
-  .world__side { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
-  .world__side .metrics { grid-column: 1; }
+  .atlas__body { grid-template-columns: 1fr; gap: 20px; }
+  .atlas__side { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; padding-top: 0; }
+  .atlas__side .metrics { grid-column: 1; grid-row: 1 / span 2; }
   .lab { grid-template-columns: 1fr; }
   .lab__rig { max-width: 320px; margin: 0 auto; }
   .card-row { grid-template-columns: 1fr; }
@@ -718,13 +785,18 @@ summary::-webkit-details-marker { display: none; }
   .profile__extras .eyebrow { width: 100%; margin: 0; }
   .extra { padding: 8px 0; }
   .extra strong { font-size: 14px; color: var(--accent); }
-  .extra > span:last-child, .mini-map { display: none; }
+  .extra > span:last-child { display: none; }
   .prose h2 { margin-top: 48px; padding-top: 36px; font-size: 27px; }
   .prose .project h3 { font-size: 20px; }
   .page { padding-top: 32px; }
   .site .page__header h1 { font-size: 34px; }
   .card { padding: 20px 18px; border-radius: 10px; }
-  .world__side { display: block; }
+  .atlas__side { display: block; }
+  .atlas__zoom button { width: 44px; height: 44px; }
+  .atlas__map { aspect-ratio: 5 / 3; }
+  .atlas__inset, .atlas.inset-left .atlas__inset { position: static; grid-column: 1 / -1; width: auto; box-shadow: none; }
+  .atlas__inset .icon-button { width: 44px; height: 44px; min-width: 44px; }
+  .atlas__inset-map { max-width: 400px; margin: 0 auto; }
   .lab__controls { grid-template-columns: 1fr; }
   .lab__rig { max-width: 210px; }
   .lab .lab__plot text { font-size: 20px; }

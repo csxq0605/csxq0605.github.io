@@ -8,6 +8,7 @@ heading: Explore
 lede: Small things that did not fit on the homepage — where I have been, who drops by, and a toy from my mechanics coursework.
 description: A world notebook of places and visitors, and an interactive damped oscillator.
 scripts:
+  - /assets/js/atlas.js
   - /assets/js/explore.js
 ---
 {% include explore/world.html %}

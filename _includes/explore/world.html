@@ -1,39 +1,56 @@
 {% assign gc_site = site.data.analytics.goatcounter_site | strip %}
-<section class="card" id="world" aria-labelledby="world-title" data-world
+<section class="card atlas" id="world" aria-labelledby="world-title" data-atlas
+  data-map-base="{{ '/assets/data/map/' | relative_url }}"
   {% if gc_site != "" %}data-visitors-url="{{ '/assets/data/visitor-atlas.json' | relative_url }}"{% endif %}>
   <div class="card__head">
     <div>
       <h2 id="world-title">World notebook</h2>
-      <p class="card__note">Two maps on one page: the places I have been, and the countries this site has been read from.</p>
+      <p class="card__note">Where I have been, and where this site is read from. Click a highlighted country to zoom in, then a province for its cities.</p>
     </div>
     <span class="badge" data-demo-badge hidden>EXAMPLE DATA</span>
   </div>
 
   <div class="tabs" role="tablist" aria-label="Map view">
-    <button type="button" role="tab" id="tab-footprints" aria-controls="world-panel" aria-selected="true" data-view="footprints">My footprints</button>
-    <button type="button" role="tab" id="tab-visitors" aria-controls="world-panel" aria-selected="false" tabindex="-1" data-view="visitors">Visitors</button>
+    <button type="button" role="tab" id="tab-footprints" aria-controls="atlas-panel" aria-selected="true" data-view="footprints">My footprints</button>
+    <button type="button" role="tab" id="tab-visitors" aria-controls="atlas-panel" aria-selected="false" tabindex="-1" data-view="visitors">Visitors</button>
   </div>
 
-  <div class="world" id="world-panel" role="tabpanel" aria-labelledby="tab-footprints">
-    <div>
-      <div class="world__map">
-        <span class="world__land" aria-hidden="true"></span>
-        <div class="world__pins" data-pins></div>
+  <div class="atlas__body" id="atlas-panel" role="tabpanel" aria-labelledby="tab-footprints">
+    <div class="atlas__stage" data-stage>
+      <nav class="atlas__crumbs" aria-label="Map level" data-crumbs></nav>
+      <div class="atlas__zoom" role="group" aria-label="Zoom">
+        <button type="button" data-zoom="in" aria-label="Zoom in">+</button>
+        <button type="button" data-zoom="out" aria-label="Zoom out">−</button>
+        <button type="button" data-zoom="reset" aria-label="Show the whole level">⤢</button>
       </div>
-      <div class="chips" data-chips></div>
+      <svg class="atlas__map" data-map viewBox="0 0 1000 448" preserveAspectRatio="xMidYMid meet" role="group" aria-label="World map">
+        <g data-layer="world"></g>
+        <path class="atlas__kashmir" data-kashmir d=""><title>Kashmir (disputed, not coloured)</title></path>
+        <g data-layer="country"></g>
+        <path class="atlas__dash" data-dash d=""/>
+        <g data-layer="marks"></g>
+      </svg>
+      <p class="atlas__tip" data-tip role="status" hidden></p>
+      <p class="atlas__loading" data-loading hidden>Loading map…</p>
+      <aside class="atlas__inset" data-inset hidden aria-labelledby="inset-title">
+        <div class="atlas__inset-head">
+          <h3 id="inset-title" data-inset-title></h3>
+          <button type="button" class="icon-button" data-inset-close aria-label="Close province detail">✕</button>
+        </div>
+        <svg class="atlas__inset-map" data-inset-map viewBox="0 0 400 300" role="img" aria-labelledby="inset-title"></svg>
+        <p class="atlas__inset-note" data-inset-note></p>
+        <ul class="atlas__inset-list" data-inset-list></ul>
+      </aside>
     </div>
-    <div class="world__side">
-      <dl class="metrics" data-metrics>
-        <div><dt>Places</dt><dd>1</dd></div>
-        <div><dt>Countries / regions</dt><dd>1</dd></div>
-      </dl>
-      <div>
-        <p class="world__note" data-note>Based in Beijing.</p>
-        <p class="world__detail" data-detail aria-live="polite"></p>
-        <button class="text-button" type="button" data-demo hidden>Preview with example data</button>
-      </div>
+    <div class="atlas__side">
+      <dl class="metrics" data-metrics></dl>
+      <p class="world__note" data-note></p>
+      <button class="text-button" type="button" data-demo hidden>Preview with example data</button>
     </div>
   </div>
-  <p class="world__caption" data-caption>Markers sit at city or country centres. Visitor counts are per country; no IP addresses are stored or shown.</p>
-  <script type="application/json" data-world-data>{{ site.data.explore | jsonify }}</script>
+  <div class="chips" data-chips></div>
+  <noscript><p class="world__note">Places I have been: {% for c in site.data.footprints.countries %}{{ c.name }}{% if c.regions %} ({% for r in c.regions %}{{ r.name }}{% if r.cities %}: {{ r.cities | map: "name" | join: ", " }}{% endif %}{% unless forloop.last %}; {% endunless %}{% endfor %}){% endif %}{% unless forloop.last %} · {% endunless %}{% endfor %}.</p></noscript>
+  <p class="world__caption" data-caption></p>
+  <p class="atlas__credit">Illustrative map. Boundaries from <a href="https://www.naturalearthdata.com/">Natural Earth</a> (China point of view) and DataV GeoAtlas / AMap; South China Sea islands and dashed line shown, Kashmir uncoloured.</p>
+  <script type="application/json" data-atlas-data>{"footprints": {{ site.data.footprints | jsonify }}, "examples": {{ site.data.explore.example_visitors | jsonify }}}</script>
 </section>

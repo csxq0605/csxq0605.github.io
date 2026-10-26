@@ -1,0 +1,43 @@
+# Places I have been, for the layered world map (world → country → province → city).
+#
+# countries: one entry per country (ISO 3166-1 alpha-2 `code`).
+#   regions:   provinces / states visited (China: DataV adcode, e.g. "650000").
+#              home: true       → my base (marked separately)
+#              counts_as: HK    → counted as its own country / region in the totals
+#              cities:          → prefecture-level cities visited inside the province
+#                                 (id = DataV adcode, name = label shown on the map)
+#   A country or province without sub-entries is shown as visited as a whole.
+#
+# Detail maps exist for all 34 Chinese provinces, so adding provinces or cities needs
+# no rebuild. Only a new country with its own province layer needs `npm run build`
+# in scripts/map/ (add it to ADMIN1 in build.mjs).
+countries:
+  - code: CN
+    name: China
+    regions:
+      - { id: "110000", name: Beijing, home: true }
+      - { id: "120000", name: Tianjin }
+      - { id: "310000", name: Shanghai }
+      - { id: "500000", name: Chongqing }
+      - id: "650000"
+        name: Xinjiang
+        cities:
+          - { id: "650100", name: Ürümqi }
+          - { id: "654000", name: Ili }
+          - { id: "653100", name: Kashgar }
+          - { id: "650400", name: Turpan }
+      - { id: "620000", name: Gansu }
+      - { id: "640000", name: Ningxia }
+      - { id: "610000", name: Shaanxi }
+      - { id: "510000", name: Sichuan }
+      - { id: "370000", name: Shandong }
+      - { id: "320000", name: Jiangsu }
+      - { id: "330000", name: Zhejiang }
+      - { id: "440000", name: Guangdong }
+      - { id: "810000", name: Hong Kong, counts_as: HK }
+      - { id: "820000", name: Macao, counts_as: MO }
+      - { id: "710000", name: Taiwan, counts_as: TW }
+  - { code: SG, name: Singapore }
+  - { code: MY, name: Malaysia }
+  - { code: JP, name: Japan }
+  - { code: US, name: United States }

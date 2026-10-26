@@ -1,41 +1,5 @@
-# Data for the world notebook on /explore/.
-#
-# home: where I am based (always shown).
-# travel: places I have been — a city, a province or a whole country / region.
-# Markers sit at its centre. Add entries like:
-#   - name: Kyoto
-#     country: Japan
-#     code: JP            # ISO 3166-1 alpha-2, used to count countries / regions.
-#                         # Hong Kong (HK), Macao (MO) and Taiwan (TW) count as
-#                         # their own regions, matching the visitor map.
-#     lat: 35.01
-#     lng: 135.77
-home:
-  name: Beijing
-  country: China
-  code: CN
-  lat: 39.90
-  lng: 116.41
-travel:
-  - { name: Shanghai, country: China, code: CN, lat: 31.23, lng: 121.47 }
-  - { name: Tianjin, country: China, code: CN, lat: 39.13, lng: 117.20 }
-  - { name: Chongqing, country: China, code: CN, lat: 29.95, lng: 107.80 }
-  - { name: Xinjiang, country: China, code: CN, lat: 41.20, lng: 85.30 }
-  - { name: Gansu, country: China, code: CN, lat: 37.80, lng: 101.50 }
-  - { name: Ningxia, country: China, code: CN, lat: 37.30, lng: 106.20 }
-  - { name: Shaanxi, country: China, code: CN, lat: 35.60, lng: 108.90 }
-  - { name: Sichuan, country: China, code: CN, lat: 30.60, lng: 102.70 }
-  - { name: Shandong, country: China, code: CN, lat: 36.40, lng: 118.20 }
-  - { name: Jiangsu, country: China, code: CN, lat: 33.00, lng: 119.60 }
-  - { name: Zhejiang, country: China, code: CN, lat: 29.20, lng: 120.10 }
-  - { name: Guangdong, country: China, code: CN, lat: 23.40, lng: 113.40 }
-  - { name: Hong Kong, code: HK, lat: 22.32, lng: 114.17 }
-  - { name: Macao, code: MO, lat: 22.20, lng: 113.55 }
-  - { name: Taiwan, code: TW, lat: 23.70, lng: 121.00 }
-  - { name: Singapore, code: SG, lat: 1.35, lng: 103.82 }
-  - { name: Malaysia, code: MY, lat: 3.14, lng: 101.69 }
-  - { name: Japan, code: JP, lat: 36.20, lng: 138.25 }
-  - { name: United States, code: US, lat: 39.50, lng: -98.35 }
+# Example visitor numbers for the world notebook's Visitors tab.
+# Places I have been now live in _data/footprints.yml.
 
 # Illustrative visitor numbers, shown only after "Preview with example data"
 # and always labelled as examples. They are not real visits.

@@ -116,7 +116,8 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     // The world map lives on the homepage too.
     await p.locator('.widget--explore a[href="/#world"]').click();
     await p.waitForFunction(() => location.hash === '#world');
-    assert.strictEqual(await p.locator('#world .pin').count(), 20);
+    await p.waitForSelector('#world [data-layer="world"] path');
+    assert.deepStrictEqual(await p.locator('#world [data-layer="world"] path.is-visited').evaluateAll(ps => ps.map(x => x.dataset.id).sort()), ['CN', 'JP', 'MY', 'SG', 'US']);
     await p.getByRole('tab', { name: 'Visitors' }).click();
     await p.locator('#world [data-demo]').click();
     assert.deepStrictEqual(await p.locator('#world [data-metrics] dd').allTextContents(), ['689', '8']);
@@ -163,39 +164,95 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     await p.context().close();
   }
 
-  // Explore: world notebook.
+  // Explore: world notebook — world → China → province detail, and back.
   {
     const p = await page(browser, 390);
     await p.goto(base + '/explore/', { waitUntil: 'networkidle' });
-    assert.strictEqual(await p.locator('.pin').count(), 20);
-    assert.deepStrictEqual(await texts(p, '[data-metrics] dd'), ['20', '8', '3.2%']);
+    const crumbs = async () => (await p.locator('[data-crumbs]').innerText()).replace(/\s+/g, ' ').trim();
+    const viewBox = async () => (await p.locator('[data-map]').getAttribute('viewBox')).split(' ').map(Number);
+    await p.waitForSelector('[data-layer="world"] path');
+    assert.deepStrictEqual(await texts(p, '[data-metrics] dd'), ['8', '16 / 34', '4', '3.2%']);
+    assert.strictEqual(await crumbs(), 'World');
+    const worldView = await viewBox();
+    // Kashmir is drawn uncoloured; the South China Sea dashed line is present.
+    assert.ok((await p.locator('[data-kashmir]').getAttribute('d')).length > 100);
+    assert.ok((await p.locator('[data-dash]').getAttribute('d')).length > 100);
+    // Keyboard: open China from its map shape.
+    await p.locator('[data-layer="world"] path[data-id="CN"]').focus();
+    await p.keyboard.press('Enter');
+    await p.waitForSelector('[data-layer="country"] .atlas__region');
+    assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region').count(), 34);
+    assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region.is-visited').count(), 16);
+    assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region.is-home').count(), 1);
+    assert.ok((await p.locator('[data-layer="country"] .atlas__dash').getAttribute('d')).length > 100);
+    assert.strictEqual(await crumbs(), 'World › China');
+    assert.ok((await viewBox())[2] < worldView[2] / 2, 'zoomed in to China');
+    // Province detail with the four Xinjiang cities.
+    await p.locator('.chip', { hasText: 'Xinjiang' }).click();
+    await p.waitForSelector('[data-inset-map] .atlas__part');
+    assert.strictEqual(await crumbs(), 'World › China › Xinjiang');
+    assert.deepStrictEqual(await p.locator('[data-inset-list] li').evaluateAll(ls => ls.map(l => l.firstChild.textContent).sort()), ['Ili', 'Kashgar', 'Turpan', 'Ürümqi']);
+    assert.strictEqual(await p.locator('[data-inset-map] .atlas__part.is-visited').count(), 4);
+    assert.strictEqual(await p.locator('[data-inset-map] .atlas__city-label').count(), 4);
+    await p.keyboard.press('Escape');
+    assert.ok(await p.locator('[data-inset]').isHidden());
+    assert.strictEqual(await crumbs(), 'World › China');
+    // A province without listed cities is shaded as a whole.
+    await p.locator('.chip', { hasText: 'Guangdong' }).click();
+    await p.waitForSelector('[data-inset-map] .atlas__part');
+    assert.match(await p.locator('[data-inset-note]').textContent(), /Cities not noted separately/);
+    assert.strictEqual(await p.locator('[data-inset-map] .atlas__part:not(.is-visited)').count(), 0);
+    // Zoom buttons, then the breadcrumb back to the world.
+    const before = await viewBox();
+    await p.getByRole('button', { name: 'Zoom in' }).click();
+    assert.ok((await viewBox())[2] < before[2]);
+    await p.locator('[data-crumbs] button', { hasText: 'World' }).click();
+    assert.ok(await p.locator('[data-inset]').isHidden());
+    assert.strictEqual(await crumbs(), 'World');
+    assert.deepStrictEqual(await viewBox(), worldView);
+    // Hong Kong opens China with its detail; Japan has no places listed, so it is shaded whole.
+    await p.locator('.chip', { hasText: 'Hong Kong' }).click();
+    await p.waitForSelector('[data-inset-map] .atlas__part');
+    assert.strictEqual(await crumbs(), 'World › China › Hong Kong');
+    await p.keyboard.press('Escape');
+    await p.keyboard.press('Escape');
+    assert.strictEqual(await crumbs(), 'World');
+    await p.locator('.chip', { hasText: 'Japan' }).click();
+    await p.waitForSelector('[data-layer="country"] .atlas__region');
+    assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region:not(.is-whole)').count(), 0);
+    assert.match(await p.locator('[data-note]').textContent(), /not noted separately/);
+    assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    // Visitors: switching tabs returns to the world view.
     await p.getByRole('tab', { name: 'Visitors' }).click();
+    assert.strictEqual(await crumbs(), 'World');
+    assert.strictEqual(await p.locator('[data-layer="country"] path').count(), 0);
     assert.deepStrictEqual(await texts(p, '[data-metrics] dd'), ['—', '—']);
     assert.ok(await p.locator('[data-demo-badge]').isHidden());
     await p.locator('[data-demo]').click();
     assert.deepStrictEqual(await texts(p, '[data-metrics] dd'), ['689', '8']);
     assert.ok(await p.locator('[data-demo-badge]').isVisible());
-    await p.locator('.chip').first().click();
-    assert.match(await p.locator('[data-detail]').textContent(), /China · 312 visitors/);
+    assert.match(await p.locator('[data-layer="world"] path[data-id="CN"]').getAttribute('class'), /\bv4\b/);
+    assert.strictEqual(await p.locator('[data-layer="world"] path.is-visited').count(), 0);
+    assert.match(await p.locator('.chip').first().textContent(), /^China\s*312$/);
     await p.getByRole('tab', { name: 'Visitors' }).press('ArrowLeft');
     assert.strictEqual(await p.getByRole('tab', { name: 'My footprints' }).getAttribute('aria-selected'), 'true');
     assert.ok(await p.locator('[data-demo-badge]').isHidden());
     assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     assert.deepStrictEqual(p.errors, []);
-    console.log('PASS explore: footprints, visitors off-state, labelled example data, keyboard tabs');
+    console.log('PASS explore: world → China → Xinjiang cities, Esc and breadcrumb back, zoom, whole-country shading, visitors tab');
     await p.context().close();
   }
 
   // Explore: visitor data contract, with the endpoint mocked.
   for (const [label, status, body, expected] of [
     ['real data', 200, { regions: [{ name: 'China', code: 'CN', lat: 35.9, lng: 104.2, visits: 12 }], unlocated_visits: 3, updated_at: '2026-10-25T08:00:00Z', period_start: '2026-10-01' }, ['15', '1']],
-    ['malformed rows dropped', 200, { regions: [{ name: 'X', code: 'XX', lat: 500, lng: 0, visits: 2 }] }, ['0', '0']],
+    ['malformed rows dropped', 200, { regions: [{ name: 'X', code: 'xx', visits: 2 }, { name: 'Y', code: 'YY', visits: -1 }, { name: 'Z', code: 'ZZ', visits: 1.5 }, { code: 'QQ', visits: 1 }] }, ['0', '0']],
     ['server error', 503, {}, ['—', '—']],
   ]) {
     const p = await page(browser, 1024);
     await p.route(u => u.pathname === '/explore/', async r => {
       const res = await r.fetch();
-      const html = (await res.text()).replace('data-world', 'data-world data-visitors-url="' + base + '/fixture.json"');
+      const html = (await res.text()).replace('data-atlas', 'data-atlas data-visitors-url="' + base + '/fixture.json"');
       r.fulfill({ response: res, body: html });
     });
     await p.route(base + '/fixture.json', r => r.fulfill({ status, json: body }));

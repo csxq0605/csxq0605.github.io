@@ -28,4 +28,4 @@
 - 计数脚本只在 GitHub Pages 的生产构建中加载；本地预览不会计数。
 - 无法定位的访问会计入总数，并在地图说明中注明“无已知位置”的数量。
 - 如果某次导出失败，脚本不会覆盖上一份数据，地图继续显示上次结果。
-- 国家／地区标记位置来自 `scripts/data/country-centroids.json`（源自 mledoze/countries，ODbL 许可）。
+- 访客按国家／地区给地图着色；香港、澳门、台湾的访问计入中国的颜色，但在列表中单独列出。国家名称与代码校验来自 `scripts/data/country-centroids.json`（源自 mledoze/countries，ODbL 许可）。
