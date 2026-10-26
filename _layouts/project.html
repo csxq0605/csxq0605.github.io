@@ -1,0 +1,24 @@
+---
+layout: site
+---
+{%- assign p = site.data.projects | where: "slug", page.slug | first -%}
+<main class="page project-page" id="content" tabindex="-1">
+  <p><a class="back-link" href="{{ '/#projects' | relative_url }}">← All projects</a></p>
+  <header class="page__header">
+    <p class="eyebrow">{{ page.repo }}</p>
+    <h1>{{ p.title | default: page.title }}</h1>
+    <p class="page__lede">{{ p.tagline }}</p>
+    <p class="project-page__links"><a class="button" href="https://github.com/{{ page.repo }}" target="_blank" rel="noopener">{% include site/icon.html name='github' %} View on GitHub</a></p>
+  </header>
+  <div class="prose" data-project-content>
+    <section class="project-overview" aria-label="Overview">
+      <h2 class="plain">Overview</h2>
+      {{ p.description | markdownify }}
+    </section>
+    <section class="readme" aria-label="README">
+      <h2 class="plain">README</h2>
+      <p class="readme__source">Copied from <a href="https://github.com/{{ page.repo }}">{{ page.repo }}</a> at <code>{{ page.source_commit }}</code> on {{ page.synced_at }}.</p>
+      {{ content }}
+    </section>
+  </div>
+</main>

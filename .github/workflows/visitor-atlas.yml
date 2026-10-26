@@ -1,0 +1,38 @@
+name: Visitor atlas
+
+# Daily: copy per-country visitor totals from GoatCounter into
+# assets/data/visitor-atlas.json, which /explore/ reads from this same site
+# (raw.githubusercontent.com is unreliable from mainland China). Does nothing
+# until _data/analytics.json names a GoatCounter site. See docs/visitor-statistics.md.
+on:
+  schedule:
+    - cron: '17 19 * * *'   # 03:17 Beijing time
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: visitor-atlas
+  cancel-in-progress: false
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Export country totals
+        env:
+          GOATCOUNTER_API_TOKEN: ${{ secrets.GOATCOUNTER_API_TOKEN }}
+        run: |
+          mkdir -p assets/data
+          python3 scripts/export_visitor_atlas.py --output assets/data/visitor-atlas.json
+      - name: Commit if the numbers changed
+        run: |
+          [ -f assets/data/visitor-atlas.json ] || { echo "Visitor counting is off."; exit 0; }
+          git add assets/data/visitor-atlas.json
+          if git diff --cached --quiet -I '"updated_at"'; then echo "No change."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update visitor atlas"
+          git push

@@ -1,0 +1,24 @@
+name: GitHub activity widget
+
+# Weekly: refresh _data/github_activity.json for the sidebar heatmap.
+on:
+  schedule:
+    - cron: '23 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/fetch_github_activity.py csxq0605
+      - name: Commit if the numbers changed
+        run: |
+          if git diff --quiet -I '"updated"' -- _data/github_activity.json; then echo "No change."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Refresh GitHub activity"
+          git push

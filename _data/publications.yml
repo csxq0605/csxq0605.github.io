@@ -1,0 +1,17 @@
+# Published academic papers only, newest first. While this list is empty, the
+# Publications section and its menu link are hidden; adding a paper brings them back.
+#
+# To add one, uncomment and edit:
+#
+# - title: "Paper title"
+#   authors: [Wangjie Su, Coauthor Name]     # "Wangjie Su" is highlighted
+#   venue: "Conference or Journal (ABBR)"
+#   year: 2027
+#   key: su2027short                          # BibTeX key
+#   status: published                         # or: accepted
+#   links:
+#     Paper: https://...
+#     Code: https://github.com/...
+#   bibtex: |                                 # optional; generated if omitted
+#     @inproceedings{su2027short, ...}
+[]

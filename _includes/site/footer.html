@@ -1,0 +1,11 @@
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <p>© {{ site.time | date: '%Y' }} Wangjie Su · Beijing</p>
+    <nav aria-label="Footer">
+      <a href="mailto:{{ site.author.email }}">Email</a>
+      <a href="https://github.com/{{ site.author.github }}">GitHub</a>
+      {% if site.author.steam %}<a href="https://steamcommunity.com/profiles/{{ site.author.steam }}">Steam</a>{% endif %}
+      <a href="#top" data-back-to-top>Back to top</a>
+    </nav>
+  </div>
+</footer>

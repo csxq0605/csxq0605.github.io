@@ -1,0 +1,46 @@
+{% assign page_title = site.title %}{% if page.title and page.title != "" %}{% assign page_title = page.title | append: " · " | append: site.title %}{% endif %}
+{% assign page_description = page.description | default: site.description %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title }}</title>
+    <meta name="description" content="{{ page_description | strip_html | escape_once }}">
+    <meta property="og:title" content="{{ page_title }}">
+    <meta property="og:description" content="{{ page_description | strip_html | escape_once }}">
+    <meta property="og:site_name" content="{{ site.title }}">
+    <meta property="og:image" content="{{ site.author.avatar | prepend: '/' | absolute_url }}">
+    <meta name="twitter:card" content="summary">
+    <link rel="canonical" href="{{ page.url | replace: 'index.html', '' | absolute_url }}">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#fbfaf7">
+    <script>
+      /* Apply the saved or system appearance before first paint. */
+      (function () {
+        var theme;
+        try { theme = localStorage.getItem('site-theme'); } catch (e) {}
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      }());
+    </script>
+    <link rel="preload" href="{{ '/assets/fonts/newsreader/newsreader.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ '/images/apple-touch-icon.png' | relative_url }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ '/images/favicon-32x32.png' | relative_url }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ '/images/favicon-16x16.png' | relative_url }}">
+    <link rel="manifest" href="{{ '/images/site.webmanifest' | relative_url }}">
+  </head>
+  <body id="top" class="site site--{{ page.body_class | default: 'page' }}">
+    <a class="skip-link" href="#content">Skip to content</a>
+    {% include site/header.html %}
+    {{ content }}
+    {% include site/footer.html %}
+    {% include site/search.html %}
+    <script src="{{ '/assets/js/site.js' | relative_url }}" defer></script>
+    {% for script in page.scripts %}<script src="{{ script | relative_url }}" defer></script>{% endfor %}
+    {% include site/tracking.html %}
+  </body>
+</html>

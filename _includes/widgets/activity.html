@@ -1,0 +1,8 @@
+{%- assign act = site.data.github_activity -%}
+{%- if act -%}
+<section class="widget widget--activity" aria-labelledby="w-act" data-widget-activity>
+  <h2 class="widget__label" id="w-act">GitHub · last 20 weeks</h2>
+  <div class="heatmap" data-heatmap role="img" aria-label="{{ act.total }} public contributions in the past year"></div>
+  <p class="widget__foot"><a href="https://github.com/{{ act.user }}">{{ act.total }} contributions</a> in the past year</p>
+</section>
+{%- endif -%}

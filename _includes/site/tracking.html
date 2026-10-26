@@ -1,0 +1,8 @@
+{%- comment -%} Visitor counting stays off until _data/analytics.json names a GoatCounter site. {%- endcomment -%}
+{%- assign gc_site = site.data.analytics.goatcounter_site | strip -%}
+{%- if gc_site != "" and page.analytics != false and jekyll.environment == "production" -%}
+<script data-goatcounter="https://{{ gc_site }}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+{%- endif -%}
+{%- if site.google_analytics_id and site.google_analytics_id != "" and page.analytics != false -%}
+{% include analytics.html %}
+{%- endif -%}

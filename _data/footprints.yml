@@ -1,0 +1,183 @@
+# Places I have been, for the layered world map.
+#
+# Every country is shown by its first-level divisions (provinces, states, prefectures).
+# Inside China, a province opens a detail window with the prefecture-level cities.
+#
+# countries: one entry per country (ISO 3166-1 alpha-2 `code`).
+#   regions:   first-level divisions visited.
+#              China: DataV adcode, e.g. "650000". Elsewhere: ISO 3166-2, e.g. "US-CA".
+#              home: true       → my base (marked separately)
+#              counts_as: HK    → counted as its own country / region in the totals
+#              city: true       → the division is itself a city (Beijing, Hong Kong, …)
+#              cities:          → China only: prefecture-level cities visited inside it
+#                                 (id = DataV adcode; Taiwan: ISO 3166-2 such as TW-TPE;
+#                                 name = label shown on the map; a place with no shape
+#                                 on the map can give zh, lat and lng instead)
+#   A country or province without sub-entries is shown as visited as a whole.
+#
+# Detail maps exist for all 34 Chinese provinces, so adding provinces or cities needs
+# no rebuild. Only a new country with its own province layer needs `npm run build`
+# in scripts/map/ (add it to ADMIN1 in build.mjs).
+countries:
+  - code: CN
+    name: China
+    regions:
+      - { id: "110000", name: Beijing, home: true, city: true }
+      - { id: "120000", name: Tianjin, city: true }
+      - { id: "310000", name: Shanghai, city: true }
+      - { id: "500000", name: Chongqing, city: true }
+      - id: "130000"
+        name: Hebei
+        cities:
+          - { id: "130200", name: Tangshan }
+          - { id: "130300", name: Qinhuangdao }
+          - { id: "130600", name: Baoding }
+          - { id: "130700", name: Zhangjiakou }
+          - { id: "130800", name: Chengde }
+          - { id: "131000", name: Langfang }
+      - id: "150000"
+        name: Inner Mongolia
+        cities:
+          - { id: "150100", name: Hohhot }
+          - { id: "150600", name: Ordos }
+          - { id: "150700", name: Hulunbuir }
+          - { id: "150900", name: Ulanqab }
+          - { id: "152500", name: Xilingol }
+      - id: "210000"
+        name: Liaoning
+        cities:
+          - { id: "210600", name: Dandong }
+      - id: "420000"
+        name: Hubei
+        cities:
+          - { id: "420100", name: Wuhan }
+      - id: "320000"
+        name: Jiangsu
+        cities:
+          - { id: "320100", name: Nanjing }
+          - { id: "320200", name: Wuxi }
+          - { id: "320500", name: Suzhou }
+          - { id: "321000", name: Yangzhou }
+          - { id: "321100", name: Zhenjiang }
+      - id: "330000"
+        name: Zhejiang
+        cities:
+          - { id: "330100", name: Hangzhou }
+          - { id: "330200", name: Ningbo }
+          - { id: "330400", name: Jiaxing }
+          - { id: "330500", name: Huzhou }
+          - { id: "330600", name: Shaoxing }
+      - id: "340000"
+        name: Anhui
+        cities:
+          - { id: "340100", name: Hefei }
+          - { id: "341000", name: Huangshan }
+      - id: "370000"
+        name: Shandong
+        cities:
+          - { id: "370100", name: Jinan }
+          - { id: "371000", name: Weihai }
+      - id: "440000"
+        name: Guangdong
+        cities:
+          - { id: "440100", name: Guangzhou }
+          - { id: "440300", name: Shenzhen }
+          - { id: "440400", name: Zhuhai }
+          - { id: "440500", name: Shantou }
+          - { id: "445100", name: Chaozhou }
+          - { id: "445200", name: Jieyang }
+      - id: "460000"
+        name: Hainan
+        cities:
+          - { id: "460100", name: Haikou }
+          - { id: "460200", name: Sanya }
+      - id: "510000"
+        name: Sichuan
+        cities:
+          - { id: "510100", name: Chengdu }
+      - id: "610000"
+        name: Shaanxi
+        cities:
+          - { id: "610100", name: "Xi'an" }
+          - { id: "610300", name: Baoji }
+          - { id: "610400", name: Xianyang }
+      - id: "620000"
+        name: Gansu
+        cities:
+          - { id: "620100", name: Lanzhou }
+          - { id: "620600", name: Wuwei }
+          - { id: "620700", name: Zhangye }
+          - { id: "620900", name: Jiuquan }
+      - id: "640000"
+        name: Ningxia
+        cities:
+          - { id: "640100", name: Yinchuan }
+          - { id: "640400", name: Guyuan }
+      - id: "650000"
+        name: Xinjiang
+        cities:
+          - { id: "650100", name: Ürümqi }
+          - { id: "650400", name: Turpan }
+          - { id: "650500", name: Hami }
+          - { id: "652800", name: Bayingolin }
+          - { id: "652900", name: Aksu }
+          - { id: "653100", name: Kashgar }
+          - { id: "653200", name: Hotan }
+          - { id: "654000", name: Ili }
+          - { id: "654200", name: Tacheng }
+          - { id: "654300", name: Altay }
+          - { id: "659001", name: Shihezi }
+      - { id: "810000", name: Hong Kong, counts_as: HK, city: true }
+      - { id: "820000", name: Macao, counts_as: MO, city: true }
+      - id: "710000"
+        name: Taiwan
+        counts_as: TW
+        cities:
+          - { id: TW-TPE, name: Taipei }
+          - { id: TW-TPQ, name: New Taipei }
+          - { id: TW-TAO, name: Taoyuan }
+          - { id: TW-TXG, name: Taichung }
+          - { id: TW-TNN, name: Tainan }
+          - { id: TW-KHH, name: Kaohsiung }
+          - { id: TW-KEE, name: Keelung }
+          - { id: TW-HSZ, name: Hsinchu }
+          - { id: TW-NAN, name: Nantou }
+          - { id: TW-PIF, name: Pingtung }
+          - { id: TW-HUA, name: Hualien }
+          - { id: TW-TTT, name: Taitung }
+          - { id: TW-PEN, name: Penghu }
+          - { id: TW-KIN, name: Kinmen }
+          - { id: TW-LIE, name: Lienchiang, zh: 连江县, lat: 26.16, lng: 119.95 }
+  - code: JP
+    name: Japan
+    regions:
+      - { id: JP-13, name: Tokyo }
+      - { id: JP-14, name: Kanagawa }
+      - { id: JP-26, name: Kyoto }
+      - { id: JP-27, name: Osaka }
+      - { id: JP-29, name: Nara }
+      - { id: JP-30, name: Wakayama }
+      - { id: JP-34, name: Hiroshima }
+  - code: MY
+    name: Malaysia
+    regions:
+      - { id: MY-14, name: Kuala Lumpur }
+      - { id: MY-04, name: Melaka }
+      - { id: MY-12, name: Sabah }
+  - { code: SG, name: Singapore }
+  - { code: GB, name: United Kingdom }
+  - { code: FR, name: France }
+  - { code: BE, name: Belgium }
+  - { code: NL, name: Netherlands }
+  - { code: DE, name: Germany }
+  - { code: CH, name: Switzerland }
+  - { code: IT, name: Italy }
+  - { code: ES, name: Spain }
+  - code: US
+    name: United States
+    regions:
+      - { id: US-CA, name: California }
+      - { id: US-DC, name: "Washington, D.C." }
+      - { id: US-NV, name: Nevada }
+      - { id: US-NY, name: New York }
+      - { id: US-WA, name: Washington }

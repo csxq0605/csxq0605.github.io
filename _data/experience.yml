@@ -1,0 +1,27 @@
+# Experience, newest first. Rendered as a timeline on the homepage.
+#   summary: always visible (Markdown, one sentence)
+#   details: folded behind a toggle (Markdown); only for long entries
+#   more_label: text of that toggle (default "Full description")
+#   end: omit for an ongoing position (shown as "Present")
+- role: Independent Project Lead and Early Technical Team Member
+  org: Hangzhou Yuanxi Technology
+  start: 2026-06-01
+  end: 2026-09-01
+  summary: Contributed end to end across the frontend, backend, and runtime of [ManySelves](/#project-manyselves), independently designing and implementing its runtime kernel and capability packages.
+- role: Undergraduate Researcher
+  org: AI + Fusion Energy Series Project, Xinao Technology Innovation Center, Peking University
+  start: 2026-03-01
+  people_label: PIs
+  people:
+    - name: Prof. Yunfeng Liang
+    - name: Prof. Songfang Huang
+      url: https://www.coe.pku.edu.cn/teaching/all_time/13007.html
+  summary: "Studying long-horizon research autonomy: preserving executable research state across interruptions and advancing only through independent evidence. The project develops four layers for orchestration/execution, evidence/verification, memory/evolution, and governance/collaboration; Nexgent provides the long-running substrate and can monitor long fusion simulations."
+- role: Undergraduate Researcher
+  org: Combustion Laboratory, Peking University
+  start: 2025-05-01
+  people_label: PI
+  people:
+    - name: Prof. Zheng Chen
+      url: https://www.coe.pku.edu.cn/teaching/all_time/7195.html
+  summary: Studying multiscale combustion processes and the complementary roles of mechanistic and data-driven models.

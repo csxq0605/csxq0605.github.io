@@ -1,0 +1,55 @@
+{% comment %}Publications appears once _data/publications.yml lists a paper.{% endcomment %}
+{% if site.data.publications.size > 0 %}{% assign pubs_item = "publications:Publications," %}{% else %}{% assign pubs_item = "" %}{% endif %}
+{% assign sections = "about-me:About,research-interest:Research,news:News,education:Education,experience:Experience," | append: pubs_item | append: "projects:Projects,honors-and-awards:Honors" | split: "," %}
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="site-brand" href="{{ '/' | relative_url }}"><span class="site-brand__name">Wangjie Su</span><span class="site-brand__place">Peking University</span></a>
+
+    <nav class="site-nav" aria-label="Main">
+      {% for item in sections %}{% assign parts = item | split: ":" %}
+        {% if parts[0] == "projects" %}
+        <details class="nav-menu" data-menu>
+          <summary data-section-link="projects">Projects{% include site/icon.html name='down' %}</summary>
+          <div class="nav-menu__panel">
+            <a class="nav-menu__overview" href="{{ '/#projects' | relative_url }}">All projects on this page</a>
+            {% for project in site.data.projects %}
+            <a href="{{ project.url }}" target="_blank" rel="noopener"><strong>{{ project.name }}{% include site/icon.html name='external' %}</strong><span>{{ project.note }}</span></a>
+            {% endfor %}
+          </div>
+        </details>
+        {% else %}
+        <a href="{{ '/#' | append: parts[0] | relative_url }}" data-section-link="{{ parts[0] }}">{{ parts[1] }}</a>
+        {% endif %}
+      {% endfor %}
+      <span class="site-nav__divider" aria-hidden="true"></span>
+      <a href="{{ '/explore/' | relative_url }}"{% if page.url == '/explore/' %} aria-current="page"{% endif %}>Explore</a>
+      <a href="{{ '/cv/' | relative_url }}"{% if page.url == '/cv/' %} aria-current="page"{% endif %}>CV</a>
+    </nav>
+
+    <div class="site-actions">
+      <details class="compact-menu" data-menu>
+        <summary>Menu{% include site/icon.html name='down' %}</summary>
+        <div class="compact-menu__panel">
+          <p class="eyebrow">On the homepage</p>
+          <nav class="compact-menu__sections" aria-label="Homepage sections">
+            {% for item in sections %}{% assign parts = item | split: ":" %}
+            <a href="{{ '/#' | append: parts[0] | relative_url }}" data-section-link="{{ parts[0] }}"><small>{{ forloop.index | prepend: '0' }}</small>{{ parts[1] }}</a>
+            {% endfor %}
+          </nav>
+          <nav class="compact-menu__pages" aria-label="Pages">
+            <a href="{{ '/explore/' | relative_url }}">Explore</a>
+            <a href="{{ '/cv/' | relative_url }}">CV</a>
+          </nav>
+          <p class="eyebrow">Repositories</p>
+          <nav class="compact-menu__repos" aria-label="Project repositories">
+            {% for project in site.data.projects %}
+            <a href="{{ project.url }}" target="_blank" rel="noopener">{% include site/icon.html name='github' %}{{ project.name }}{% include site/icon.html name='external' %}</a>
+            {% endfor %}
+          </nav>
+        </div>
+      </details>
+      <button class="icon-button" type="button" data-search-open aria-label="Search this site (Ctrl or ⌘ K)" title="Search · Ctrl / ⌘ K" hidden>{% include site/icon.html name='search' %}</button>
+      <button class="icon-button" type="button" data-theme-toggle aria-label="Switch appearance" title="Light / dark">{% include site/icon.html name='theme' %}</button>
+    </div>
+  </div>
+</header>

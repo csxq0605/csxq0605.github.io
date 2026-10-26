@@ -1,0 +1,22 @@
+<aside class="profile" aria-label="Profile">
+  <div class="profile__inner">
+    <div class="profile__identity">
+      <img class="profile__avatar" src="{{ site.author.avatar | relative_url }}" alt="Wangjie Su" width="96" height="96">
+      <div>
+        <h1 class="profile__name">Wangjie Su</h1>
+        <p class="profile__alias">Bjergsen</p>
+        <p class="profile__affiliation">Peking University</p>
+      </div>
+    </div>
+    <p class="profile__field">Theoretical &amp; Applied Mechanics<br>Intelligent Science &amp; Technology</p>
+    <ul class="profile__links">
+      <li><a href="mailto:{{ site.author.email }}">Email</a></li>
+      <li><a href="https://github.com/{{ site.author.github }}">GitHub</a></li>
+      <li><a href="{{ '/cv/' | relative_url }}">CV</a></li>
+    </ul>
+    <p class="profile__status"><span class="status-dot" aria-hidden="true"></span>Open to internships</p>
+    <p class="profile__clock">{{ site.author.location }}<time data-clock>—</time></p>
+    <p class="profile__greeting" data-greeting hidden></p>
+
+  </div>
+</aside>

@@ -1,0 +1,11 @@
+{
+  "name": "homepage-map-build",
+  "private": true,
+  "description": "Builds the footprint map data in assets/data/map/ from Natural Earth and DataV sources.",
+  "type": "module",
+  "scripts": { "build": "node build.mjs" },
+  "dependencies": {
+    "d3-geo": "3.1.1",
+    "mapshaper": "0.7.98"
+  }
+}

@@ -1,0 +1,46 @@
+<section class="card" id="oscillator" aria-labelledby="oscillator-title" data-oscillator>
+  <div class="card__head">
+    <div>
+      <h2 id="oscillator-title">A little mechanics</h2>
+      <p class="card__note">A mass on a spring with a damper, released from rest one unit from equilibrium: <i>m</i>ẍ + <i>c</i>ẋ + <i>k</i>x = 0, natural period 2 s. Slide the damping ratio and watch it ring, settle, or creep.</p>
+    </div>
+  </div>
+  <div class="lab">
+    <svg class="lab__rig" viewBox="0 0 220 200" role="img" aria-label="Spring–damper–mass diagram; the mass moves as time advances" data-rig>
+      <rect class="lab__wall" x="6" y="30" width="14" height="140" rx="2"/>
+      <polyline class="lab__spring" data-spring points=""/>
+      <g data-damper>
+        <path class="lab__damper" data-damper-rod d=""/>
+        <path class="lab__damper" data-damper-cup d=""/>
+      </g>
+      <rect class="lab__mass" data-mass x="0" y="58" width="40" height="84" rx="6"/>
+      <line class="lab__axis" x1="20" y1="184" x2="214" y2="184"/>
+      <line class="lab__now" data-rest x1="0" y1="176" x2="0" y2="192"/>
+      <text data-rest-label x="0" y="198" text-anchor="middle">x = 0</text>
+    </svg>
+    <svg class="lab__plot" viewBox="0 0 600 240" role="img" aria-labelledby="oscillator-plot-title" data-plot>
+      <title id="oscillator-plot-title">Displacement against time for the chosen damping ratio</title>
+      <g data-grid></g>
+      <path class="lab__envelope" data-envelope d=""/>
+      <path class="lab__curve" data-curve d=""/>
+      <line class="lab__now" data-now x1="0" y1="12" x2="0" y2="212"/>
+      <circle class="lab__dot" data-dot r="5" cx="0" cy="0"/>
+    </svg>
+  </div>
+  <div class="lab__controls">
+    <div class="control">
+      <label for="lab-zeta">Damping ratio ζ <output for="lab-zeta" data-zeta-out>0.15</output></label>
+      <input id="lab-zeta" type="range" min="0" max="2" step="0.05" value="0.15" data-zeta>
+    </div>
+    <div class="control">
+      <label for="lab-time">Time t <output for="lab-time" data-time-out>0.00 s</output></label>
+      <input id="lab-time" type="range" min="0" max="8" step="0.01" value="0" data-time>
+    </div>
+  </div>
+  <div class="lab__buttons">
+    <button class="button button--primary" type="button" data-play aria-pressed="false">Play</button>
+    <button class="button" type="button" data-step>+0.25 s</button>
+    <button class="button" type="button" data-reset>Reset</button>
+    <p class="lab__readout"><span data-x>x = 1.000</span> · <span class="regime" data-regime aria-live="polite">Underdamped: it rings</span></p>
+  </div>
+</section>
