@@ -102,6 +102,18 @@
   function apply() {
     map.setAttribute('viewBox', [view.x, view.y, view.w, view.h].map(function (v) { return v.toFixed(2); }).join(' '));
     updateMarks();
+    sharpen();
+  }
+  // Once zoomed in past about 2x, swap in detailed borders (world-hi.json, loaded once).
+  var detail = null;
+  function sharpen() {
+    if (detail || !world || view.w > full.w / 2) return;
+    detail = 'loading';
+    load('world-hi').then(function (hi) {
+      hi.countries.forEach(function (c) { if (countryNodes[c.id]) countryNodes[c.id].setAttribute('d', c.d); });
+      if (hi.kashmir) $('[data-kashmir]').setAttribute('d', hi.kashmir);
+      detail = 'done';
+    }).catch(function () { detail = null; });
   }
   function clamp(v) {
     // Zoom between the whole world and 1/60 of it; keep the centre over the drawing.

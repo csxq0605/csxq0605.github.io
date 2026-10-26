@@ -105,33 +105,38 @@ async function main() {
 
   // World layer ------------------------------------------------------------
   const countriesSrc = await cached('ne_10m_admin_0_countries_chn.geojson', NE + 'ne_10m_admin_0_countries_chn.geojson');
-  // China keeps every island (South China Sea islands, Diaoyu Islands); in other
-  // large countries islands under 600 km² are dropped to keep the file small.
-  const china = await shape(countriesSrc, [
-    '-filter "[\'CHN\', \'HKG\', \'MAC\'].indexOf(ADM0_A3) > -1"',
-    '-each "ADM0_A3 = \'CHN\'; ISO_A2_EH = \'CN\'; NAME = \'China\'"',
-    '-dissolve ADM0_A3 copy-fields=ISO_A2_EH,NAME',
-    '-simplify 1.5% keep-shapes',
-  ].join(' '));
-  const notChina = '[\'ATA\', \'CHN\', \'HKG\', \'MAC\'].indexOf(ADM0_A3) == -1';
-  const others = await shape(countriesSrc, [
-    `-filter "${notChina} && this.area > 5e9"`,
-    '-filter-fields ADM0_A3,ISO_A2_EH,NAME',
-    '-filter-islands min-area=600km2',
-    '-simplify 0.6% keep-shapes',
-  ].join(' '));
-  // Small countries (Singapore, Malta, island states) keep all their land.
-  const small = await shape(countriesSrc, [
-    `-filter "${notChina} && this.area <= 5e9"`,
-    '-filter-fields ADM0_A3,ISO_A2_EH,NAME',
-    '-simplify 0.6% keep-shapes',
-  ].join(' '));
-  const world = { type: 'FeatureCollection', features: [...others.features, ...small.features, ...china.features] };
+  // Two levels of detail: world.json for the whole-world view, world-hi.json loaded
+  // once the reader zooms in. China keeps every island (South China Sea islands,
+  // Diaoyu Islands); in other large countries small islands are dropped, and small
+  // countries (Singapore, Malta, island states) keep all their land.
+  async function worldAt({ china: cnPct, others: otherPct, islands }) {
+    const china = await shape(countriesSrc, [
+      '-filter "[\'CHN\', \'HKG\', \'MAC\'].indexOf(ADM0_A3) > -1"',
+      '-each "ADM0_A3 = \'CHN\'; ISO_A2_EH = \'CN\'; NAME = \'China\'"',
+      '-dissolve ADM0_A3 copy-fields=ISO_A2_EH,NAME',
+      `-simplify ${cnPct} keep-shapes`,
+    ].join(' '));
+    const notChina = '[\'ATA\', \'CHN\', \'HKG\', \'MAC\'].indexOf(ADM0_A3) == -1';
+    const others = await shape(countriesSrc, [
+      `-filter "${notChina} && this.area > 5e9"`,
+      '-filter-fields ADM0_A3,ISO_A2_EH,NAME',
+      `-filter-islands min-area=${islands}`,
+      `-simplify ${otherPct} keep-shapes`,
+    ].join(' '));
+    const small = await shape(countriesSrc, [
+      `-filter "${notChina} && this.area <= 5e9"`,
+      '-filter-fields ADM0_A3,ISO_A2_EH,NAME',
+      `-simplify ${otherPct} keep-shapes`,
+    ].join(' '));
+    return { type: 'FeatureCollection', features: [...others.features, ...small.features, ...china.features] };
+  }
+  const world = await worldAt({ china: '4%', others: '2%', islands: '300km2' });
+  const worldHi = await worldAt({ china: '15%', others: '8%', islands: '100km2' });
   const disputed = await cached('ne_10m_admin_0_disputed_areas.geojson', NE + 'ne_10m_admin_0_disputed_areas.geojson');
   const kashmir = await shape(disputed, [
     '-filter "[\'Jammu and Kashmir\', \'Gilgit-Baltistan\', \'Azad Kashmir\', \'Siachen Glacier\'].indexOf(BRK_NAME) > -1"',
     '-dissolve',
-    '-simplify 2% keep-shapes',
+    '-simplify 5% keep-shapes',
   ].join(' '));
   const cnSrc = await cached('datav_100000_full.json', DATAV + '100000_full.json');
   const dashSrc = { type: 'FeatureCollection', features: cnSrc.features.filter(f => f.properties.adcode === '100000_JD').map(f => JSON.parse(JSON.stringify(f))) };
@@ -144,23 +149,35 @@ async function main() {
   const proj = { scale: projection.scale(), translate: projection.translate() };
   // A few minor territories share their country's ISO code (Clipperton Island is
   // "FR"); the largest feature keeps the code, the others use their adm0_a3.
-  const owner = {};
-  for (const f of world.features) {
-    const iso = f.properties.ISO_A2_EH;
-    if (iso && iso !== '-99' && (!owner[iso] || geoArea(f) > geoArea(owner[iso]))) owner[iso] = f;
+  function ids(fc) {
+    const owner = {};
+    for (const f of fc.features) {
+      const iso = f.properties.ISO_A2_EH;
+      if (iso && iso !== '-99' && (!owner[iso] || geoArea(f) > geoArea(owner[iso]))) owner[iso] = f;
+    }
+    return f => (owner[f.properties.ISO_A2_EH] === f ? f.properties.ISO_A2_EH : f.properties.ADM0_A3);
   }
-  const countries = world.features.map(f => {
-    const iso = f.properties.ISO_A2_EH;
-    return {
-      id: owner[iso] === f ? iso : f.properties.ADM0_A3,
-      name: f.properties.NAME,
-      d: worldPath(f),
-      box: box(worldPath, f),
-      focus: focusBox(worldPath, f),
-      area: Math.round(geoArea(f) * 1e6),
-      c: worldPath.centroid(f).map(r),
-    };
-  }).filter(c => c.d);
+  const idOf = ids(world);
+  const countries = world.features.map(f => ({
+    id: idOf(f),
+    name: f.properties.NAME,
+    d: worldPath(f),
+    box: box(worldPath, f),
+    focus: focusBox(worldPath, f),
+    area: Math.round(geoArea(f) * 1e6),
+    c: worldPath.centroid(f).map(r),
+  })).filter(c => c.d);
+  const hiPath = geoPath(projection).digits(2);
+  const hiId = ids(worldHi);
+  const kashmirHi = await shape(disputed, [
+    '-filter "[\'Jammu and Kashmir\', \'Gilgit-Baltistan\', \'Azad Kashmir\', \'Siachen Glacier\'].indexOf(BRK_NAME) > -1"',
+    '-dissolve',
+    '-simplify 20% keep-shapes',
+  ].join(' '));
+  report.push(['world-hi.json', await write('world-hi.json', {
+    countries: worldHi.features.map(f => ({ id: hiId(f), d: hiPath(f) })).filter(c => c.d),
+    kashmir: hiPath(kashmirHi.features[0]),
+  })]);
   report.push(['world.json', await write('world.json', {
     width: WIDTH, height, projection: proj, countries,
     kashmir: worldPath(kashmir.features[0]),
@@ -170,7 +187,7 @@ async function main() {
   // China provinces (DataV), same projection --------------------------------
   const cnLayer = geoPath(projection).digits(2);
   const provinces = await shape({ type: 'FeatureCollection', features: cnSrc.features.filter(f => f.properties.adcode !== '100000_JD') },
-    '-filter-fields adcode,name -simplify 7% keep-shapes');
+    '-filter-fields adcode,name -simplify 25% keep-shapes');
   const cnFeatures = provinces.features.map(f => ({
     id: String(f.properties.adcode),
     name: CN_NAMES[f.properties.adcode] || f.properties.name,
@@ -188,7 +205,7 @@ async function main() {
   const admin1 = await cached('ne_10m_admin_1_states_provinces.geojson', NE + 'ne_10m_admin_1_states_provinces.geojson');
   for (const [iso, a3] of Object.entries(ADMIN1)) {
     const states = await shape({ type: 'FeatureCollection', features: admin1.features.filter(f => f.properties.adm0_a3 === a3) },
-      '-filter-fields iso_3166_2,name,name_zh -simplify 3% keep-shapes');
+      '-filter-fields iso_3166_2,name,name_zh -simplify 15% keep-shapes');
     const layer = geoPath(projection).digits(2);
     // Zoom to the main landmass: ignore far-off states such as Alaska and Hawaii.
     const core = states.features.filter(f => !['US-AK', 'US-HI'].includes(f.properties.iso_3166_2));
@@ -207,10 +224,10 @@ async function main() {
     let parts;
     if (p.id === '710000') {
       parts = await shape({ type: 'FeatureCollection', features: admin1.features.filter(f => f.properties.adm0_a3 === 'TWN') },
-        '-each "adcode = iso_3166_2; name = name_zh" -filter-fields adcode,name -simplify 6% keep-shapes');
+        '-each "adcode = iso_3166_2; name = name_zh" -filter-fields adcode,name -simplify 25% keep-shapes');
     } else {
       const src = await cached(`datav_${p.id}_full.json`, DATAV + `${p.id}_full.json`);
-      parts = await shape(src, '-filter-fields adcode,name -simplify 6% keep-shapes');
+      parts = await shape(src, '-filter-fields adcode,name -simplify 20% keep-shapes');
     }
     // Taiwan's frame also takes in Matsu (Lienchiang), which has no shape here.
     const frame = p.id === '710000'

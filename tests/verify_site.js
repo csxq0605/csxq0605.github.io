@@ -187,6 +187,8 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     assert.ok((await p.locator('[data-layer="country"] .atlas__dash').getAttribute('d')).length > 100);
     assert.strictEqual(await crumbs(), 'World › China');
     assert.ok((await viewBox())[2] < worldView[2] / 2, 'zoomed in to China');
+    // Zoomed in, the detailed borders replace the world-view ones.
+    await p.waitForFunction(() => document.querySelector('[data-layer="world"] path[data-id="JP"]').getAttribute('d').length > 3000);
     // Province detail with the Xinjiang cities.
     await p.locator('.chip', { hasText: 'Xinjiang' }).click();
     await p.waitForSelector('[data-inset-map] .atlas__part');
