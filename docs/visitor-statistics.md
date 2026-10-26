@@ -1,6 +1,6 @@
 # 开启访客地图
 
-目前**没有统计任何访问**。Explore 页面的 Visitors 标签会显示“尚未开启”，示例数据只会在点击后显示，并标注为 EXAMPLE DATA。
+已于 2026-10-26 开启，站点为 `csxq.goatcounter.com`。首页和 Explore 页地图的 Visitors 标签显示各国访客数；在第一次每日导出之前，会显示“已开始统计”。示例数据只在点击后显示，并标注为 EXAMPLE DATA。
 
 ## 原理
 

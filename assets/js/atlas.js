@@ -491,6 +491,9 @@
     } else if (visitors.state === 'loading') {
       note.textContent = 'Loading visitor counts…';
       caption.textContent = 'Unique visitors per country. No IP addresses are stored or shown.';
+    } else if (visitors.state === 'pending') {
+      note.textContent = 'Counting has started; the first numbers appear after the next daily update.';
+      caption.textContent = 'Unique visitors per country, updated once a day. No IP addresses are stored or shown.';
     } else if (visitors.state === 'error') {
       note.textContent = 'Visitor counts are unavailable right now.';
       caption.textContent = 'Unique visitors per country. No IP addresses are stored or shown.';
@@ -708,8 +711,14 @@
     var controller = window.AbortController ? new AbortController() : null;
     var timer = setTimeout(function () { if (controller) controller.abort(); }, 8000);
     fetch(endpoint, { credentials: 'omit', cache: 'no-cache', signal: controller ? controller.signal : undefined })
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (r) {
+        // No file yet: counting is on, but the daily export has not run.
+        if (r.status === 404) { visitors.state = 'pending'; return null; }
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
       .then(function (json) {
+        if (!json) return;
         visitors.regions = cleanVisits(json.regions);
         visitors.unlocated = Number(json.unlocated_visits) >= 0 ? Math.floor(Number(json.unlocated_visits)) : 0;
         visitors.updated = typeof json.updated_at === 'string' ? json.updated_at.slice(0, 16).replace('T', ' ') + ' UTC' : null;
