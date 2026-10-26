@@ -42,37 +42,13 @@ I am **actively seeking internship opportunities** in AI agents, agent harness a
 - *2026.03 - now*, **Undergraduate Researcher**, AI + Fusion Energy Series Project, Xinao Technology Innovation Center, Peking University. Studying long-horizon research autonomy: preserving executable research state across interruptions and advancing only through independent evidence. The project develops four layers for orchestration/execution, evidence/verification, memory/evolution, and governance/collaboration; Nexgent provides the long-running substrate and can monitor long fusion simulations. PIs: Prof. Yunfeng Liang and [Prof. Songfang Huang](https://www.coe.pku.edu.cn/teaching/all_time/13007.html).
 - *2025.05 - now*, **Undergraduate Researcher**, Combustion Laboratory, Peking University. Studying multiscale combustion processes and the complementary roles of mechanistic and data-driven models under [Prof. Zheng Chen](https://www.coe.pku.edu.cn/teaching/all_time/7195.html).
 
+## Publications {#publications}
+
+{% include home/publications.html %}
+
 ## Projects {#projects}
 
-<div class="project" markdown="1">
-
-### [Nexgent: A Desktop Agent Team That Learns](https://github.com/csxq0605/Nexgent)
-
-A general-purpose desktop agent (TypeScript monorepo; Electron desktop app and CLI over one in-process SDK) that works in the user's project folder. Each project has a coordinator that only splits, dispatches, relays corrections, and summarizes; threads work in their own copies of the project and, when a piece is large, use an `organize` tool to assign one to six members with generic roles. After each team run it records the cost, time, failures, and wasted work of every part, changes only the hottest spot, and keeps or reverts that change on the next similar task while keeping a solo control group; experience notes are enabled or disabled by randomized with/without comparisons, and outcomes count only deterministic checks, user corrections, and external review. Mid-run user messages take effect on the next model request, the user's own words survive context compaction verbatim, and an append-only JSONL session log with a usage ledger allows recovery after a hard kill, with OS-level sandboxing, approvals, and three-level cost limits.
-
-[csxq0605/Nexgent](https://github.com/csxq0605/Nexgent){: .repo-link}
-
-</div>
-
-<div class="project" markdown="1">
-
-### [Tiny PyTorch: CUDA Deep-Learning Framework](https://github.com/csxq0605/pku-aiprogramming)
-
-Grew an AI programming course project (tensors, reverse-mode autodiff, C++/CUDA layers, pybind11) into a PyTorch-style framework (Python package `tinytensor`) with bf16 tensor-core convolution, grouped convolution, BatchNorm, LayerNorm, single-kernel attention, and fused layers. The whole training step runs without CPU read-back and is replayed as a CUDA Graph. On one A100 it trains ViT-Tiny, ResNet18, ResNeXt26, and VGG16 on ImageNet-1k at 64x64 (top-1 56.5% / 56.0% / 62.6% / 57.6%), matching PyTorch epoch by epoch over the first 10 epochs from the same initial weights; per epoch it is 2.56x / 1.39x faster than torch.compile on ViT-Tiny / ResNet18, on par on ResNeXt26, and 30% slower on VGG16, where cuDNN's convolution kernels are still faster.
-
-[csxq0605/pku-aiprogramming](https://github.com/csxq0605/pku-aiprogramming){: .repo-link}
-
-</div>
-
-<div class="project" markdown="1">
-
-### [Where Is My Codex (Flow Rescue)](https://github.com/csxq0605/where-is-my-codex)
-
-A computer-graphics course project: a 2D fluid-puzzle game built with Python, Taichi, Position-Based Fluids, GPU/CPU backends, five playable levels, and a Tiled import pipeline.
-
-[csxq0605/where-is-my-codex](https://github.com/csxq0605/where-is-my-codex){: .repo-link}
-
-</div>
+{% include home/projects.html %}
 
 ## Honors {#honors-and-awards}
 

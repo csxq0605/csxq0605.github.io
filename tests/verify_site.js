@@ -4,7 +4,7 @@
 const { chromium } = require('playwright');
 const assert = require('assert');
 const base = (process.argv[2] || 'http://127.0.0.1:4100').replace(/\/$/, '');
-const SECTIONS = ['about-me', 'research-interest', 'news', 'education', 'experience', 'projects', 'honors-and-awards'];
+const SECTIONS = ['about-me', 'research-interest', 'news', 'education', 'experience', 'publications', 'projects', 'honors-and-awards'];
 const REPOS = ['https://github.com/csxq0605/Nexgent', 'https://github.com/csxq0605/pku-aiprogramming', 'https://github.com/csxq0605/where-is-my-codex'];
 
 async function page(browser, width, opts = {}) {
@@ -24,9 +24,10 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
   for (const width of [1440, 1141, 1140, 1024, 761, 760, 390, 320]) {
     const p = await page(browser, width);
     await p.goto(base + '/', { waitUntil: 'networkidle' });
-    assert.deepStrictEqual(await p.locator('.home__main h2').evaluateAll(hs => hs.map(h => h.id)), SECTIONS);
+    assert.deepStrictEqual(await p.locator('.home__main > h2').evaluateAll(hs => hs.map(h => h.id)), SECTIONS);
     assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'horizontal overflow at ' + width);
-    assert.deepStrictEqual(await p.locator('a.repo-link').evaluateAll(as => as.map(a => a.href)), REPOS);
+    assert.deepStrictEqual(await p.locator('.card-project__repo').evaluateAll(as => as.map(a => a.href)), REPOS);
+    assert.ok((await p.locator('.pub').count()) >= 1);
     assert.strictEqual(await p.locator('script[data-goatcounter]').count(), 0);
 
     if (width > 1140) {
@@ -41,7 +42,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
       await p.locator('.compact-menu summary').click();
       const box = await p.locator('.compact-menu__panel').boundingBox();
       assert.ok(box.x >= 0 && box.x + box.width <= width + 0.5, 'menu off screen at ' + width);
-      assert.strictEqual(await p.locator('.compact-menu__sections a').count(), 7);
+      assert.strictEqual(await p.locator('.compact-menu__sections a').count(), 8);
       assert.deepStrictEqual(await p.locator('.compact-menu__repos a').evaluateAll(as => as.map(a => a.href)), REPOS);
       await p.locator('.compact-menu__sections a[href="/#projects"]').click();
       assert.ok(!(await p.locator('.compact-menu').evaluate(d => d.open)));
@@ -71,6 +72,34 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     assert.notStrictEqual(await p.locator('html').getAttribute('data-theme'), before);
     assert.deepStrictEqual(p.errors, []);
     console.log(`PASS home ${width}px: order, links, menus, current section, search, theme`);
+    await p.context().close();
+  }
+
+  // Project cards open a README panel; Cite copies BibTeX.
+  for (const width of [1440, 390]) {
+    const p = await page(browser, width, { permissions: ['clipboard-read', 'clipboard-write'] });
+    await p.goto(base + '/#projects', { waitUntil: 'networkidle' });
+    await p.locator('.card-project').nth(1).click();
+    await p.waitForSelector('#project-drawer[open]');
+    assert.strictEqual(await p.locator('[data-drawer-title]').textContent(), 'Tiny PyTorch');
+    assert.ok(await p.locator('[data-drawer-body] .readme').count());
+    assert.ok(await p.locator('[data-drawer-body] img').evaluateAll(imgs => imgs.length > 0 && imgs.every(i => i.getAttribute('src').startsWith('/assets/projects/'))));
+    assert.match(p.url(), /#project-tiny-pytorch$/);
+    const box = await p.locator('#project-drawer').boundingBox();
+    assert.ok(box.x >= 0 && box.x + box.width <= width + 0.5);
+    await p.keyboard.press('Escape');
+    await p.waitForFunction(() => !document.getElementById('project-drawer').open && location.hash === '#projects');
+    await p.goto(base + '/#project-flow-rescue', { waitUntil: 'networkidle' });
+    await p.waitForSelector('#project-drawer[open]');
+    assert.strictEqual(await p.locator('[data-drawer-title]').textContent(), 'Where Is My Codex');
+    await p.locator('[data-drawer-close]').click();
+    await p.locator('.pub__cite').first().click();
+    const bib = await p.evaluate(() => navigator.clipboard.readText());
+    assert.match(bib, /^@techreport\{su2026tinypytorch,/);
+    assert.match(bib, /author = \{Wangjie Su\}/);
+    assert.strictEqual(await p.locator('.pub__cite').first().textContent(), 'BibTeX copied');
+    assert.deepStrictEqual(p.errors, []);
+    console.log(`PASS cards ${width}px: README panel, deep link, close, Cite copies BibTeX`);
     await p.context().close();
   }
 
@@ -170,8 +199,11 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     const p = await page(browser, 320, { javaScriptEnabled: false });
     await p.goto(base + '/', { waitUntil: 'networkidle' });
     await p.locator('.compact-menu summary').click();
-    assert.strictEqual(await p.locator('.compact-menu__sections a').count(), 7);
-    assert.strictEqual(await p.locator('.project').count(), 3);
+    assert.strictEqual(await p.locator('.compact-menu__sections a').count(), 8);
+    assert.strictEqual(await p.locator('.card-project').count(), 3);
+    await p.locator('.card-project__name a').first().click();
+    await p.waitForURL('**/projects/nexgent/');
+    assert.ok(await p.locator('.readme').isVisible());
     console.log('PASS no JavaScript: content and native menu');
     await p.context().close();
   }

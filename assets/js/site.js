@@ -62,7 +62,7 @@
   }
 
   /* Current homepage section ------------------------------------------- */
-  var headings = Array.prototype.slice.call(document.querySelectorAll('.home__main h2[id]'));
+  var headings = Array.prototype.slice.call(document.querySelectorAll('.home__main > h2[id]'));
   var sectionLinks = Array.prototype.slice.call(document.querySelectorAll('[data-section-link]'));
   if (headings.length && sectionLinks.length) {
     var current = null, queued = false;

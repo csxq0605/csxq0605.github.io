@@ -1,0 +1,50 @@
+# Publications and write-ups, newest first.
+#
+# Add a paper by copying an entry. Fields:
+#   type      paper | preprint | technical report | course report | design note
+#   title, authors (list; "Wangjie Su" is highlighted), venue, year
+#   links     label → URL pairs shown as buttons
+#   bibtex    optional; omit to have one generated from the fields above
+#
+# There are no peer-reviewed papers yet. The entries below are real write-ups
+# from the project repositories, labelled by what they are.
+- type: technical report
+  title: "Tiny PyTorch: Growing a From-Scratch CUDA Framework to ImageNet-1k Training"
+  authors: [Wangjie Su]
+  venue: Technical report, project repository
+  year: 2026
+  key: su2026tinypytorch
+  note: Training VGG16, ResNet18, ResNeXt26 and ViT-Tiny at 64×64 on one A100, compared epoch by epoch with PyTorch.
+  links:
+    Report: https://github.com/csxq0605/pku-aiprogramming#readme
+    Code: https://github.com/csxq0605/pku-aiprogramming
+- type: course report
+  title: "Flow Rescue: A Position-Based Fluids Puzzle Game (图形学物理仿真课程报告)"
+  authors: [Wangjie Su]
+  venue: Course report, Computer Graphics, Peking University
+  year: 2026
+  key: su2026flowrescue
+  note: PBF solver, terrain projection and level design for a five-level fluid puzzle.
+  links:
+    Report: https://github.com/csxq0605/where-is-my-codex/tree/main/report
+    Code: https://github.com/csxq0605/where-is-my-codex
+- type: design note
+  title: "Manyselves: Product and Architecture Positioning (最终产品与架构定位)"
+  authors: [Wangjie Su]
+  venue: Design document, project repository
+  year: 2026
+  key: su2026manyselves
+  note: The normative target for a recoverable runtime of file-defined agent teams.
+  links:
+    Document: https://github.com/csxq0605/manyselves/blob/main/docs/PROJECT_POSITIONING.md
+    Code: https://github.com/csxq0605/manyselves
+- type: design note
+  title: "Nexgent: Product and Design Positioning (产品与设计定位)"
+  authors: [Wangjie Su]
+  venue: Design document, project repository
+  year: 2026
+  key: su2026nexgent
+  note: How the coordinator, team runs and experience notes are meant to behave.
+  links:
+    Document: https://github.com/csxq0605/Nexgent/blob/main/docs/PROJECT_POSITIONING.md
+    Code: https://github.com/csxq0605/Nexgent

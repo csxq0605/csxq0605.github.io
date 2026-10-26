@@ -119,8 +119,18 @@ kramdown:
   smart_quotes: lsquo,rsquo,ldquo,rdquo
   enable_coderay: false
 
+collections:
+  projects:
+    output: true
+    permalink: /projects/:name/
+
 # Defaults
 defaults:
+  - scope:
+      path: ""
+      type: projects
+    values:
+      layout: project
   # _pages
   - scope:
       path: ""
