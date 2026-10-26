@@ -9,7 +9,6 @@
 #                         # their own regions, matching the visitor map.
 #     lat: 35.01
 #     lng: 135.77
-#     year: 2025          # optional
 home:
   name: Beijing
   country: China
