@@ -32,7 +32,7 @@ I am **actively seeking internship opportunities** in AI agents, agent harness a
 
 ## Education {#education}
 
-{% include home/timeline.html items=site.data.education %}
+{% include home/timeline.html items=site.data.education quiet=true %}
 
 <p class="tl-note"><strong>GPA:</strong> 3.818/4.0. Full coursework is listed in my <a href="/cv/">CV</a>.</p>
 

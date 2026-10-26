@@ -1,12 +1,14 @@
 # Experience, newest first. Rendered as a timeline on the homepage.
 #   summary: always visible (Markdown, one sentence)
-#   details: behind "Full description" (Markdown); omit when the summary says it all
+#   details: folded behind a toggle (Markdown); only for long entries
+#   more_label: text of that toggle (default "Full description")
 #   end: omit for an ongoing position (shown as "Present")
 - role: Independent Project Lead and Early Technical Team Member
   org: Hangzhou Yuanxi Technology
   start: 2026-06-01
   end: 2026-09-01
   summary: Contributed end to end across the frontend, backend, and runtime of [ManySelves](https://github.com/csxq0605/manyselves), independently designing and implementing its runtime kernel and capability packages.
+  more_label: How ManySelves works
   details: |
     ManySelves is a recoverable local runtime for file-defined agent teams: identities, skills, tasks, contracts, and workflows are declared in Markdown, YAML, and JSON Schema, compiled into a frozen plan, and executed by a stateless kernel. Its bundled power-distribution safety reporting capability splits work so that code handles structure (grouping, citations, gap classification, reconciliation, assembly) while the model makes the professional judgments in a judgment ledger, and revisions produce a new version under the same run, reopening only the modules whose facts changed.
 - role: Undergraduate Researcher
@@ -17,9 +19,7 @@
     - name: Prof. Yunfeng Liang
     - name: Prof. Songfang Huang
       url: https://www.coe.pku.edu.cn/teaching/all_time/13007.html
-  summary: "Studying long-horizon research autonomy: preserving executable research state across interruptions and advancing only through independent evidence."
-  details: |
-    The project develops four layers for orchestration/execution, evidence/verification, memory/evolution, and governance/collaboration; Nexgent provides the long-running substrate and can monitor long fusion simulations.
+  summary: "Studying long-horizon research autonomy: preserving executable research state across interruptions and advancing only through independent evidence. The project develops four layers for orchestration/execution, evidence/verification, memory/evolution, and governance/collaboration; Nexgent provides the long-running substrate and can monitor long fusion simulations."
 - role: Undergraduate Researcher
   org: Combustion Laboratory, Peking University
   start: 2025-05-01

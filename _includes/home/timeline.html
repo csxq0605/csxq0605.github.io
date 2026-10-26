@@ -2,16 +2,16 @@
 <ol class="timeline">
   {%- for item in include.items %}
   {%- assign sy = item.start | date: "%Y" -%}{%- assign ey = item.end | date: "%Y" -%}
-  <li class="tl-item{% unless item.end %} is-current{% endunless %}">
+  <li class="tl-item{% unless item.end or include.quiet %} is-current{% endunless %}">
     <div class="tl-head">
       <h3 class="tl-role">{{ item.role | markdownify | remove: '<p>' | remove: '</p>' | strip }}</h3>
       <p class="tl-date">
         {%- if item.end and sy == ey -%}
-        <time datetime="{{ item.start | date: '%Y-%m' }}">{{ item.start | date: "%b" }}</time> – <time datetime="{{ item.end | date: '%Y-%m' }}">{{ item.end | date: "%b %Y" }}</time>
+        <time datetime="{{ item.start | date: '%Y-%m' }}">{{ item.start | date: "%b" }}</time> <span aria-hidden="true">–</span><span class="visually-hidden">to</span> <time datetime="{{ item.end | date: '%Y-%m' }}">{{ item.end | date: "%b %Y" }}</time>
         {%- elsif item.end -%}
-        <time datetime="{{ item.start | date: '%Y-%m' }}">{{ item.start | date: "%b %Y" }}</time> – <time datetime="{{ item.end | date: '%Y-%m' }}">{{ item.end | date: "%b %Y" }}</time>
+        <time datetime="{{ item.start | date: '%Y-%m' }}">{{ item.start | date: "%b %Y" }}</time> <span aria-hidden="true">–</span><span class="visually-hidden">to</span> <time datetime="{{ item.end | date: '%Y-%m' }}">{{ item.end | date: "%b %Y" }}</time>
         {%- else -%}
-        <time datetime="{{ item.start | date: '%Y-%m' }}">{{ item.start | date: "%b %Y" }}</time> – <span class="tl-now">Present</span>
+        <time datetime="{{ item.start | date: '%Y-%m' }}">{{ item.start | date: "%b %Y" }}</time> <span aria-hidden="true">–</span><span class="visually-hidden">to</span> <span class="tl-now">Present</span>
         {%- endif -%}
       </p>
     </div>
@@ -24,7 +24,7 @@
     {%- endif %}
     {%- if item.details %}
     <details class="tl-more">
-      <summary>Full description</summary>
+      <summary>{{ item.more_label | default: "Full description" }}</summary>
       <div class="tl-details">{{ item.details | markdownify }}</div>
     </details>
     {%- endif %}
