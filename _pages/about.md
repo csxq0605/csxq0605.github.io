@@ -40,9 +40,11 @@ I am **actively seeking internship opportunities** in AI agents, agent harness a
 
 {% include home/timeline.html items=site.data.experience %}
 
+{% if site.data.publications.size > 0 %}
 ## Publications {#publications}
 
 {% include home/publications.html %}
+{% endif %}
 
 ## Projects {#projects}
 

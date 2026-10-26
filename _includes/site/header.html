@@ -1,4 +1,6 @@
-{% assign sections = "about-me:About,research-interest:Research,news:News,education:Education,experience:Experience,publications:Publications,projects:Projects,honors-and-awards:Honors" | split: "," %}
+{% comment %}Publications appears once _data/publications.yml lists a paper.{% endcomment %}
+{% if site.data.publications.size > 0 %}{% assign pubs_item = "publications:Publications," %}{% else %}{% assign pubs_item = "" %}{% endif %}
+{% assign sections = "about-me:About,research-interest:Research,news:News,education:Education,experience:Experience," | append: pubs_item | append: "projects:Projects,honors-and-awards:Honors" | split: "," %}
 <header class="site-header">
   <div class="site-header__inner">
     <a class="site-brand" href="{{ '/' | relative_url }}"><span class="site-brand__name">Wangjie Su</span><span class="site-brand__place">Peking University</span></a>

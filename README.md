@@ -8,7 +8,7 @@ Source of **<https://csxq0605.github.io>**, the personal homepage of Wangjie Su 
 
 | 页面 | 内容 |
 |---|---|
-| `/` 首页 | 左侧个人资料与小组件，右侧依次为 About Me、Research Interest、News、Education、Experience、Publications、Projects、Honors；底部是世界地图和鱼塘 |
+| `/` 首页 | 左侧个人资料与小组件，右侧依次为 About Me、Research Interest、News、Education、Experience、（有论文后出现的 Publications）、Projects、Honors；底部是世界地图和鱼塘 |
 | `/projects/<名称>/` | 每个项目的介绍与 README；首页点项目卡片时，以侧边面板打开同样的内容 |
 | `/explore/` | 世界地图（足迹 / 访客）与阻尼振子小实验 |
 | `/cv/` | 中英文简历 PDF |
@@ -23,7 +23,7 @@ Source of **<https://csxq0605.github.io>**, the personal homepage of Wangjie Su 
 | 简介、研究兴趣、新闻、荣誉 | `_pages/about.md` |
 | 教育 | `_data/education.yml` |
 | 经历（摘要始终显示，`details` 可折叠） | `_data/experience.yml` |
-| 论文（只放已发表的学术论文；Cite 按钮自动生成 BibTeX） | `_data/publications.yml` |
+| 论文（只放已发表的学术论文；列表为空时整个章节和菜单项都隐藏，加上第一篇就会出现；Cite 按钮自动生成 BibTeX） | `_data/publications.yml` |
 | 项目卡片、顶部 Projects 菜单、搜索里的项目 | `_data/projects.yml` |
 | 去过的地方（国家 → 省份 → 城市） | `_data/footprints.yml`（文件开头有写法说明） |
 | 侧栏小组件的开关与顺序、世界地图、鱼塘 | `_data/widgets.yml` |

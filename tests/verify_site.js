@@ -4,7 +4,7 @@
 const { chromium } = require('playwright');
 const assert = require('assert');
 const base = (process.argv[2] || 'http://127.0.0.1:4100').replace(/\/$/, '');
-const SECTIONS = ['about-me', 'research-interest', 'news', 'education', 'experience', 'publications', 'projects', 'honors-and-awards'];
+const SECTIONS = ['about-me', 'research-interest', 'news', 'education', 'experience', 'projects', 'honors-and-awards'];
 const REPOS = ['https://github.com/csxq0605/Nexgent', 'https://github.com/csxq0605/manyselves', 'https://github.com/csxq0605/pku-aiprogramming', 'https://github.com/csxq0605/where-is-my-codex'];
 
 async function page(browser, width, opts = {}) {
@@ -28,7 +28,8 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'horizontal overflow at ' + width);
     assert.deepStrictEqual(await p.locator('.card-project__repo').evaluateAll(as => as.map(a => a.href)), REPOS);
     assert.strictEqual(await p.locator('.pub').count(), 0);
-    assert.strictEqual(await p.locator('.pub-empty').textContent(), 'No publications yet.');
+    // No papers yet: the Publications section and its menu link are hidden.
+    assert.strictEqual(await p.locator('#publications, a[href="/#publications"]').count(), 0);
     assert.strictEqual(await p.locator('script[data-goatcounter]').count(), 0);
 
     if (width > 1140) {
@@ -43,7 +44,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
       await p.locator('.compact-menu summary').click();
       const box = await p.locator('.compact-menu__panel').boundingBox();
       assert.ok(box.x >= 0 && box.x + box.width <= width + 0.5, 'menu off screen at ' + width);
-      assert.strictEqual(await p.locator('.compact-menu__sections a').count(), 8);
+      assert.strictEqual(await p.locator('.compact-menu__sections a').count(), 7);
       assert.deepStrictEqual(await p.locator('.compact-menu__repos a').evaluateAll(as => as.map(a => a.href)), REPOS);
       await p.locator('.compact-menu__sections a[href="/#projects"]').click();
       assert.ok(!(await p.locator('.compact-menu').evaluate(d => d.open)));
@@ -351,7 +352,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     const p = await page(browser, 320, { javaScriptEnabled: false });
     await p.goto(base + '/', { waitUntil: 'networkidle' });
     await p.locator('.compact-menu summary').click();
-    assert.strictEqual(await p.locator('.compact-menu__sections a').count(), 8);
+    assert.strictEqual(await p.locator('.compact-menu__sections a').count(), 7);
     assert.strictEqual(await p.locator('.card-project').count(), 4);
     await p.locator('.card-project__name a').first().click();
     await p.waitForURL('**/projects/nexgent/');

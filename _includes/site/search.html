@@ -12,7 +12,7 @@
     <a href="{{ '/#news' | relative_url }}" data-search-item data-keywords="news recent 近况 新闻">News<span>Recent updates</span></a>
     <a href="{{ '/#education' | relative_url }}" data-search-item data-keywords="education peking university gpa 教育 北京大学">Education<span>Peking University</span></a>
     <a href="{{ '/#experience' | relative_url }}" data-search-item data-keywords="experience internship research lab manyselves yuanxi fusion combustion 经历 实习">Experience<span>Research and engineering</span></a>
-    <a href="{{ '/#publications' | relative_url }}" data-search-item data-keywords="publications papers bibtex cite 论文 发表">Publications<span>Published papers</span></a>
+    {% if site.data.publications.size > 0 %}<a href="{{ '/#publications' | relative_url }}" data-search-item data-keywords="publications papers bibtex cite 论文 发表">Publications<span>Published papers</span></a>{% endif %}
     <a href="{{ '/#projects' | relative_url }}" data-search-item data-keywords="projects readme 项目">Projects<span>Cards with README</span></a>
     <a href="{{ '/#honors-and-awards' | relative_url }}" data-search-item data-keywords="honors awards scholarship 荣誉 奖学金">Honors<span>Scholarships and competitions</span></a>
     <p class="eyebrow">Repositories</p>

@@ -1,7 +1,6 @@
 {%- assign pubs = site.data.publications -%}
-{%- if pubs == empty or pubs.size == 0 -%}
-<p class="pub-empty">No publications yet.</p>
-{%- else -%}
+{%- comment -%}Only included when there is at least one paper (see _pages/about.md).{%- endcomment -%}
+{%- if pubs.size > 0 -%}
 <ol class="pubs" reversed>
   {%- for pub in pubs %}
   <li class="pub" id="pub-{{ pub.key }}">
