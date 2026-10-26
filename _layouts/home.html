@@ -7,5 +7,9 @@ body_class: home
   <main class="home__main prose">
     {{ content }}
   </main>
+  {% include widgets/column.html %}
 </div>
+{% if site.data.widgets.pond %}{% include widgets/pond.html %}{% endif %}
+<script src="{{ '/assets/js/lib/suncalc.js' | relative_url }}" defer></script>
+<script src="{{ '/assets/js/widgets.js' | relative_url }}" defer></script>
 <script src="{{ '/assets/js/home.js' | relative_url }}" defer></script>

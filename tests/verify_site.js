@@ -103,6 +103,38 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     await p.context().close();
   }
 
+  // Widgets, with the clock frozen at 2026-10-26 16:00 Beijing time.
+  for (const width of [1440, 390]) {
+    const p = await page(browser, width, { timezoneId: 'Europe/London' });
+    await p.clock.setFixedTime(new Date('2026-10-26T16:00:00+08:00'));
+    await p.goto(base + '/', { waitUntil: 'networkidle' });
+    const today = p.locator('[data-widget-today]');
+    assert.strictEqual(await today.locator('[data-day]').textContent(), '26');
+    assert.strictEqual(await today.locator('[data-lunar]').textContent(), '农历九月十七 · 丙午马年');
+    assert.strictEqual(await today.locator('[data-term]').textContent(), '霜降 · 第 4 天，12 天后立冬');
+    assert.strictEqual(await today.locator('[data-next]').textContent(), '元旦 · 67 天后');
+    assert.strictEqual(await today.locator('[data-year-pct]').textContent(), '81.8%');
+    assert.match(await p.locator('[data-greeting]').textContent(), /^Good morning · 早上好 — You are 8 hours behind Beijing\.$/);
+    assert.match(await p.locator('[data-moon-name]').textContent(), /^满月 · 照亮 (99|100)%$/);
+    assert.strictEqual(await p.locator('[data-sunrise]').textContent(), '日出 06:36');
+    assert.strictEqual(await p.locator('[data-sunset]').textContent(), '日落 17:22');
+    const first = await p.locator('[data-poem-text]').textContent();
+    await p.locator('[data-poem-next]').click();
+    assert.notStrictEqual(await p.locator('[data-poem-text]').textContent(), first);
+    assert.ok((await p.locator('.heatmap__cell').count()) >= 134);
+    const pond = await p.locator('.pond__canvas').boundingBox();
+    assert.ok(pond.width > 200 && pond.height >= 80);
+    await p.mouse.click(pond.x + pond.width / 2, pond.y + pond.height / 2);
+    if (width === 390) {
+      const w = await p.locator('.widgets').boundingBox();
+      assert.ok(w.width > 330, 'widgets should span the phone width');
+    }
+    assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    assert.deepStrictEqual(p.errors, []);
+    console.log(`PASS widgets ${width}px: calendar, solar term, festival, greeting, moon, sun, poem, heatmap, pond`);
+    await p.context().close();
+  }
+
   // Explore: world notebook.
   {
     const p = await page(browser, 390);

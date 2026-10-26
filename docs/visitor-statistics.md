@@ -5,8 +5,8 @@
 ## 原理
 
 1. 网页加载 GoatCounter 的计数脚本，GoatCounter 只记录国家／地区等汇总信息，不保存 IP。
-2. GitHub Actions 每小时调用 GoatCounter API（`/api/v0/stats/locations`），把各国家／地区的访客数写入 `visitor-stats` 分支上的 `visitor-atlas.json`。
-3. Explore 页面读取这个 JSON 并绘制地图。主分支不会因此每小时产生提交。
+2. GitHub Actions 每天（北京时间凌晨 3 点）调用 GoatCounter API（`/api/v0/stats/locations`），把各国家／地区的访客数写入本站的 `assets/data/visitor-atlas.json`，只有数字变化时才提交。
+3. Explore 页面从本站同一域名读取这个 JSON 并绘制地图，不依赖在大陆不稳定的 raw.githubusercontent.com。
 
 ## 开启步骤
 
@@ -20,7 +20,7 @@
    ```
 
    `start_date` 是统计起始日期，会显示在地图说明中。
-5. 推送后，在 **Actions → Visitor atlas → Run workflow** 手动运行一次，之后会每小时自动更新。
+5. 推送后，在 **Actions → Visitor atlas → Run workflow** 手动运行一次，之后每天自动更新。
 
 ## 说明
 

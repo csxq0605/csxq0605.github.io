@@ -1,0 +1,10 @@
+<section class="widget widget--explore" aria-labelledby="w-explore">
+  <h2 class="widget__label" id="w-explore">Off the main page</h2>
+  <a class="extra extra--map" href="{{ '/explore/' | relative_url }}">
+    <span class="mini-map" aria-hidden="true"><i class="mini-map__pin" style="left: {{ site.data.explore.home.lng | plus: 180 | divided_by: 3.6 }}%; top: {{ 84 | minus: site.data.explore.home.lat | divided_by: 1.44 }}%"></i></span>
+    <strong>World notebook {% include site/icon.html name='arrow' %}</strong>
+    <span>Footprints and visitors</span>
+  </a>
+  <a class="extra" href="{{ '/explore/#oscillator' | relative_url }}"><strong>A little mechanics {% include site/icon.html name='arrow' %}</strong><span>A spring, a damper, a slider</span></a>
+  <a class="extra" href="{{ '/test/' | relative_url }}"><strong>Which MUNer are you? {% include site/icon.html name='arrow' %}</strong><span>A 31-question quiz, in Chinese</span></a>
+</section>

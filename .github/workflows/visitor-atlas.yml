@@ -1,11 +1,12 @@
 name: Visitor atlas
 
-# Hourly: copy per-country visitor totals from GoatCounter into visitor-atlas.json
-# on the visitor-stats branch, which /explore/ reads. Does nothing until
-# _data/analytics.json names a GoatCounter site. See docs/visitor-statistics.md.
+# Daily: copy per-country visitor totals from GoatCounter into
+# assets/data/visitor-atlas.json, which /explore/ reads from this same site
+# (raw.githubusercontent.com is unreliable from mainland China). Does nothing
+# until _data/analytics.json names a GoatCounter site. See docs/visitor-statistics.md.
 on:
   schedule:
-    - cron: '17 * * * *'
+    - cron: '17 19 * * *'   # 03:17 Beijing time
   workflow_dispatch:
 
 permissions:
@@ -21,20 +22,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Export country totals
-        id: export
         env:
           GOATCOUNTER_API_TOKEN: ${{ secrets.GOATCOUNTER_API_TOKEN }}
         run: |
-          python3 scripts/export_visitor_atlas.py --output "$RUNNER_TEMP/visitor-atlas.json"
-          if [ -f "$RUNNER_TEMP/visitor-atlas.json" ]; then echo "written=true" >> "$GITHUB_OUTPUT"; fi
-      - name: Publish to the visitor-stats branch
-        if: steps.export.outputs.written == 'true'
+          mkdir -p assets/data
+          python3 scripts/export_visitor_atlas.py --output assets/data/visitor-atlas.json
+      - name: Commit if the numbers changed
         run: |
-          mkdir "$RUNNER_TEMP/publish" && cd "$RUNNER_TEMP/publish"
-          cp "$RUNNER_TEMP/visitor-atlas.json" .
-          git init -q -b visitor-stats
+          [ -f assets/data/visitor-atlas.json ] || { echo "Visitor counting is off."; exit 0; }
+          git add assets/data/visitor-atlas.json
+          if git diff --cached --quiet -I '"updated_at"'; then echo "No change."; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add visitor-atlas.json
-          git commit -q -m "Update visitor atlas"
-          git push -q --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" HEAD:visitor-stats
+          git commit -m "Update visitor atlas"
+          git push
