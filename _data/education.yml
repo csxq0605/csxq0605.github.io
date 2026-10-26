@@ -1,7 +1,12 @@
 # Education, newest first. Same timeline style as Experience.
+# expected: true shows the end as "2027 (expected)".
 - role: Double Degree in **Intelligent Science and Technology**
   org: Peking University
   start: 2024-09-01
+  end: 2027-07-01
+  expected: true
 - role: B.S. in **Theoretical and Applied Mechanics**
   org: Peking University
   start: 2023-09-01
+  end: 2027-07-01
+  expected: true

@@ -10,7 +10,9 @@
     <meta property="og:title" content="{{ page_title }}">
     <meta property="og:description" content="{{ page_description | strip_html | escape_once }}">
     <meta property="og:site_name" content="{{ site.title }}">
-    {% if site.github.url %}<link rel="canonical" href="{{ page.url | prepend: site.github.url | replace: '/index.html', '/' }}">{% endif %}
+    <meta property="og:image" content="{{ site.author.avatar | prepend: '/' | absolute_url }}">
+    <meta name="twitter:card" content="summary">
+    <link rel="canonical" href="{{ page.url | replace: 'index.html', '' | absolute_url }}">
     <meta name="color-scheme" content="light dark">
     <meta name="theme-color" content="#fbfaf7">
     <script>

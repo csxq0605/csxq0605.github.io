@@ -6,7 +6,9 @@
     <div class="tl-head">
       <h3 class="tl-role">{{ item.role | markdownify | remove: '<p>' | remove: '</p>' | strip }}</h3>
       <p class="tl-date">
-        {%- if item.end and sy == ey -%}
+        {%- if item.expected -%}
+        <time datetime="{{ item.start | date: '%Y-%m' }}">{{ item.start | date: "%b %Y" }}</time> <span aria-hidden="true">–</span><span class="visually-hidden">to</span> <time datetime="{{ item.end | date: '%Y' }}">{{ item.end | date: "%Y" }}</time> <span class="tl-expected">(expected)</span>
+        {%- elsif item.end and sy == ey -%}
         <time datetime="{{ item.start | date: '%Y-%m' }}">{{ item.start | date: "%b" }}</time> <span aria-hidden="true">–</span><span class="visually-hidden">to</span> <time datetime="{{ item.end | date: '%Y-%m' }}">{{ item.end | date: "%b %Y" }}</time>
         {%- elsif item.end -%}
         <time datetime="{{ item.start | date: '%Y-%m' }}">{{ item.start | date: "%b %Y" }}</time> <span aria-hidden="true">–</span><span class="visually-hidden">to</span> <time datetime="{{ item.end | date: '%Y-%m' }}">{{ item.end | date: "%b %Y" }}</time>

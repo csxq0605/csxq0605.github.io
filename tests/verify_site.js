@@ -155,6 +155,8 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     assert.match(await exp.locator('.tl-people').first().textContent(), /^PIs: Prof\. Yunfeng Liang, Prof\. Songfang Huang$/);
     assert.strictEqual(await p.locator('#education + .timeline .tl-item').count(), 2);
     assert.strictEqual(await p.locator('#education + .timeline .is-current').count(), 0);
+    const eduDates = await p.locator('#education + .timeline .tl-date').evaluateAll(ps => ps.map(p => { const c = p.cloneNode(true); c.querySelectorAll('.visually-hidden').forEach(n => n.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); }));
+    assert.deepStrictEqual(eduDates, ['Sep 2024 – 2027 (expected)', 'Sep 2023 – 2027 (expected)']);
     assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     assert.deepStrictEqual(p.errors, []);
     console.log('PASS timeline: education and experience entries, dates, PIs, ManySelves link opens its card');

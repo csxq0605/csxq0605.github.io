@@ -411,6 +411,7 @@ summary::-webkit-details-marker { display: none; }
 .prose .tl-role strong { font-weight: 600; }
 .prose .tl-date { flex: none; margin: 0; font: 12.5px/1.5 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tl-now { color: var(--accent-ink); }
+.tl-expected { color: var(--faint); }
 .prose .tl-org { margin: 2px 0 0; font-size: 14.5px; color: var(--text); }
 .prose .tl-people { margin: 2px 0 0; font-size: 13.5px; color: var(--muted); }
 .tl-summary { margin-top: 8px; }
