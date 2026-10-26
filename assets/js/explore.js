@@ -110,7 +110,7 @@
         metric('Countries / regions', String(count));
         metric('Of the world', count ? (count / WORLD_REGIONS * 100).toFixed(1) + '%' : '—');
         note.textContent = travel.length ? 'Places I have lived in or travelled to.' : 'Based in Beijing. More pins as I travel.';
-        caption.textContent = 'Markers sit at city centres. "Of the world" counts distinct countries and territories out of ' + WORLD_REGIONS + '.';
+        caption.textContent = 'Each marker sits at the centre of a city, province or country / region. "Of the world" counts distinct countries and regions out of ' + WORLD_REGIONS + '.';
         if (home) add(home, home.name + (home.country ? ', ' + home.country : '') + ' · home base', 'Home', 'pin--home');
         travel.forEach(function (p) {
           add(p, p.name + (p.country ? ', ' + p.country : '') + (p.year ? ' · ' + p.year : ''), p.code || '', '');

@@ -116,7 +116,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     // The world map lives on the homepage too.
     await p.locator('.widget--explore a[href="/#world"]').click();
     await p.waitForFunction(() => location.hash === '#world');
-    assert.strictEqual(await p.locator('#world .pin').count(), 1);
+    assert.strictEqual(await p.locator('#world .pin').count(), 20);
     await p.getByRole('tab', { name: 'Visitors' }).click();
     await p.locator('#world [data-demo]').click();
     assert.deepStrictEqual(await p.locator('#world [data-metrics] dd').allTextContents(), ['689', '8']);
@@ -167,8 +167,8 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
   {
     const p = await page(browser, 390);
     await p.goto(base + '/explore/', { waitUntil: 'networkidle' });
-    assert.strictEqual(await p.locator('.pin').count(), 1);
-    assert.deepStrictEqual(await texts(p, '[data-metrics] dd'), ['1', '1', '0.4%']);
+    assert.strictEqual(await p.locator('.pin').count(), 20);
+    assert.deepStrictEqual(await texts(p, '[data-metrics] dd'), ['20', '8', '3.2%']);
     await p.getByRole('tab', { name: 'Visitors' }).click();
     assert.deepStrictEqual(await texts(p, '[data-metrics] dd'), ['—', '—']);
     assert.ok(await p.locator('[data-demo-badge]').isHidden());
