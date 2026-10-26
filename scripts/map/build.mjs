@@ -224,10 +224,10 @@ async function main() {
     let parts;
     if (p.id === '710000') {
       parts = await shape({ type: 'FeatureCollection', features: admin1.features.filter(f => f.properties.adm0_a3 === 'TWN') },
-        '-each "adcode = iso_3166_2; name = name_zh" -filter-fields adcode,name -simplify 25% keep-shapes');
+        '-each "adcode = iso_3166_2; name = name_zh" -filter-fields adcode,name -simplify 60% keep-shapes');
     } else {
       const src = await cached(`datav_${p.id}_full.json`, DATAV + `${p.id}_full.json`);
-      parts = await shape(src, '-filter-fields adcode,name -simplify 20% keep-shapes');
+      parts = await shape(src, '-filter-fields adcode,name -simplify 50% keep-shapes');
     }
     // Taiwan's frame also takes in Matsu (Lienchiang), which has no shape here.
     const frame = p.id === '710000'
@@ -243,8 +243,36 @@ async function main() {
     })]);
   }
 
+  // Finest borders, one file per country / province in hd/, loaded by the page only
+  // for the places on screen once the reader zooms in far (past about 8x).
+  // Countries: Natural Earth at half its points. China's provinces: each province's
+  // own DataV boundary file, which is far more detailed than the national one.
+  // States elsewhere: Natural Earth admin-1 at 60%.
+  await fs.mkdir(path.join(OUT, 'hd'), { recursive: true });
+  let hdBytes = 0, hdFiles = 0;
+  const hdPath = geoPath(projection).digits(3);
+  const worldHd = await worldAt({ china: '50%', others: '50%', islands: '1km2' });
+  const hdId = ids(worldHd);
+  for (const f of worldHd.features) {
+    const d = hdPath(f);
+    if (d) { hdBytes += await write(`hd/${hdId(f)}.json`, { d }); hdFiles++; }
+  }
+  for (const p of cnFeatures) {
+    const src = await cached(`datav_${p.id}.json`, DATAV + `${p.id}.json`);
+    const outline = await shape(src, '-filter-fields adcode');
+    hdBytes += await write(`hd/cn-${p.id}.json`, { d: hdPath(outline) });
+    hdFiles++;
+  }
+  for (const [iso, a3] of Object.entries(ADMIN1)) {
+    const states = await shape({ type: 'FeatureCollection', features: admin1.features.filter(f => f.properties.adm0_a3 === a3) },
+      '-filter-fields iso_3166_2 -simplify 60% keep-shapes');
+    hdBytes += await write(`hd/${iso.toLowerCase()}.json`, { regions: states.features.map(f => ({ id: f.properties.iso_3166_2, d: hdPath(f) })) });
+    hdFiles++;
+  }
+  report.push([`hd/ (${hdFiles} files)`, hdBytes]);
+
   const total = report.reduce((s, [, n]) => s + n, 0);
-  for (const [name, size] of report) console.log(name.padEnd(18), (size / 1024).toFixed(1).padStart(7), 'KB');
+  for (const [name, size] of report) console.log(name.padEnd(20), (size / 1024).toFixed(1).padStart(7), 'KB');
   console.log('total'.padEnd(18), (total / 1024).toFixed(1).padStart(7), 'KB');
 }
 

@@ -103,6 +103,7 @@
     map.setAttribute('viewBox', [view.x, view.y, view.w, view.h].map(function (v) { return v.toFixed(2); }).join(' '));
     updateMarks();
     sharpen();
+    sharpenMore();
   }
   // Once zoomed in past about 2x, swap in detailed borders (world-hi.json, loaded once).
   var detail = null;
@@ -110,14 +111,46 @@
     if (detail || !world || view.w > full.w / 2) return;
     detail = 'loading';
     load('world-hi').then(function (hi) {
-      hi.countries.forEach(function (c) { if (countryNodes[c.id]) countryNodes[c.id].setAttribute('d', c.d); });
+      hi.countries.forEach(function (c) { if (countryNodes[c.id] && !hd[c.id]) countryNodes[c.id].setAttribute('d', c.d); });
       if (hi.kashmir) $('[data-kashmir]').setAttribute('d', hi.kashmir);
       detail = 'done';
     }).catch(function () { detail = null; });
   }
+  // Past about 16x, load the finest borders (hd/), one file per country or Chinese
+  // province, only for what is on screen.
+  var hd = {};
+  function onScreen(b) { return !(b[2] < view.x || b[0] > view.x + view.w || b[3] < view.y || b[1] > view.y + view.h); }
+  function fetchHd(key, use) {
+    if (hd[key]) return;
+    hd[key] = 'loading';
+    load('hd/' + key).then(function (x) { hd[key] = 'done'; use(x); }).catch(function () { delete hd[key]; });
+  }
+  function setShape(group, id, d) {
+    var node = group.querySelector('[data-id="' + id + '"]');
+    if (node) node.setAttribute('d', d);
+  }
+  function sharpenMore() {
+    if (!world || view.w > full.w / 16) return;
+    world.countries.forEach(function (c) {
+      if (onScreen(c.box)) fetchHd(c.id, function (x) { setShape(gWorld, c.id, x.d); });
+    });
+    var l = layer;
+    if (!l || state.tab !== 'footprints') return;
+    if (l.id === 'CN') {
+      l.regions.forEach(function (r) {
+        if (onScreen(r.box)) fetchHd('cn-' + r.id, function (x) { r.d = x.d; if (layer === l) setShape(gCountry, r.id, x.d); });
+      });
+    } else {
+      fetchHd(l.id.toLowerCase(), function (x) {
+        var byId = {};
+        x.regions.forEach(function (r) { byId[r.id] = r.d; });
+        l.regions.forEach(function (r) { if (byId[r.id]) { r.d = byId[r.id]; if (layer === l) setShape(gCountry, r.id, r.d); } });
+      });
+    }
+  }
   function clamp(v) {
-    // Zoom between the whole world and 1/60 of it; keep the centre over the drawing.
-    var w = Math.min(Math.max(v.w, full.w / 60), worldView().w), h = w * ratio;
+    // Zoom between the whole world and 1/400 of it; keep the centre over the drawing.
+    var w = Math.min(Math.max(v.w, full.w / 400), worldView().w), h = w * ratio;
     var cx = Math.min(Math.max(v.x + v.w / 2, full.x), full.x + full.w);
     var cy = Math.min(Math.max(v.y + v.h / 2, full.y), full.y + full.h);
     return { x: cx - w / 2, y: cy - h / 2, w: w, h: h };

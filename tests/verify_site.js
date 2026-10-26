@@ -237,6 +237,17 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region.is-whole').count(), 0);
     await p.locator('.chip', { hasText: 'Osaka' }).click();
     assert.ok(await p.locator('[data-inset]').isHidden(), 'no city window outside China');
+    // Zoomed in far, the finest borders load for the provinces on screen only.
+    await p.locator('[data-crumbs] button', { hasText: 'World' }).click();
+    await p.locator('.chip', { hasText: 'China' }).first().click();
+    await p.waitForSelector('[data-layer="country"] .atlas__region');
+    const hdLoads = [];
+    p.on('request', r => { const m = r.url().match(/\/hd\/([^/]+)\.json$/); if (m) hdLoads.push(m[1]); });
+    for (let i = 0; i < 6; i++) await p.getByRole('button', { name: 'Zoom in' }).click();
+    await p.waitForFunction(() => true);
+    await p.waitForTimeout(500);
+    assert.ok(hdLoads.some(k => k.startsWith('cn-')), 'province borders loaded: ' + hdLoads);
+    assert.ok(hdLoads.length < 30, 'only places on screen: ' + hdLoads.join(' '));
     // A country without divisions listed zooms to its mainland (France, not French Guiana).
     await p.locator('[data-crumbs] button', { hasText: 'World' }).click();
     await p.locator('.chip', { hasText: 'France' }).click();

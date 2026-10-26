@@ -57,7 +57,7 @@ python3 -m http.server 4100 --directory _site &     # 先 bundle exec jekyll bui
 node tests/verify_site.js http://127.0.0.1:4100     # 页面与交互（需要 playwright）
 ```
 
-足迹地图的形状数据在 `assets/data/map/`，由脚本预先生成，网页运行时不加载任何外部地图服务。中国 34 个省级行政区的城市底图都已生成，所以在 `_data/footprints.yml` 里加省份、加城市不需要重新生成；只有给新的国家加省／州一级图层时才需要：
+足迹地图的形状数据在 `assets/data/map/`，由脚本预先生成，网页运行时不加载任何外部地图服务。边界分三档精度：世界全图用 `world.json`；放大约 2 倍后换成 `world-hi.json`；放大约 16 倍后，再从 `hd/` 里只加载屏幕范围内国家或省份的最精细边界。中国 34 个省级行政区的城市底图都已生成，所以在 `_data/footprints.yml` 里加省份、加城市不需要重新生成；只有给新的国家加省／州一级图层时才需要：
 
 ```bash
 cd scripts/map && npm install && npm run build   # 生成 assets/data/map/*.json
