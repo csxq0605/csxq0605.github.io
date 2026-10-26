@@ -133,6 +133,30 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     await p.context().close();
   }
 
+  // Education and experience timeline.
+  {
+    const p = await page(browser, 390);
+    await p.goto(base + '/#experience', { waitUntil: 'networkidle' });
+    const exp = p.locator('#experience + .timeline');
+    assert.strictEqual(await exp.locator('.tl-item').count(), 3);
+    assert.strictEqual(await exp.locator('.tl-item.is-current').count(), 2);
+    assert.deepStrictEqual(await exp.locator('.tl-date').allTextContents(), ['Jun – Sep 2026', 'Mar 2026 – Present', 'May 2025 – Present']);
+    assert.strictEqual(await exp.locator('details.tl-more').count(), 2);
+    assert.ok(!(await exp.locator('.tl-details').first().isVisible()));
+    await exp.locator('.tl-more summary').first().click();
+    assert.match(await exp.locator('.tl-details').first().textContent(), /recoverable local runtime for file-defined agent teams/);
+    assert.match(await exp.locator('.tl-people').first().textContent(), /^PIs: Prof\. Yunfeng Liang, Prof\. Songfang Huang$/);
+    assert.strictEqual(await p.locator('#education + .timeline .tl-item').count(), 2);
+    assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    // Browser find-in-page and print still reach collapsed text.
+    await p.emulateMedia({ media: 'print' });
+    await p.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
+    assert.strictEqual(await exp.locator('details.tl-more[open]').count(), 2);
+    assert.deepStrictEqual(p.errors, []);
+    console.log('PASS timeline: education and experience entries, dates, PIs, details toggle, print opens all');
+    await p.context().close();
+  }
+
   // Explore: world notebook.
   {
     const p = await page(browser, 390);

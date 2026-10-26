@@ -87,6 +87,11 @@
     update();
   }
 
+  /* Print every collapsed description. */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('details.tl-more').forEach(function (d) { d.open = true; });
+  });
+
   /* Back to top keeps keyboard focus with the scroll position. */
   var back = document.querySelector('[data-back-to-top]');
   if (back) {

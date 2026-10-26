@@ -32,15 +32,13 @@ I am **actively seeking internship opportunities** in AI agents, agent harness a
 
 ## Education {#education}
 
-- *2023.09 - now*, B.S. in **Theoretical and Applied Mechanics**, Peking University.
-- *2024.09 - now*, Double Degree in **Intelligent Science and Technology**, Peking University.
-- **GPA:** 3.818/4.0. Full coursework is listed in my [CV](/cv/).
+{% include home/timeline.html items=site.data.education %}
+
+<p class="tl-note"><strong>GPA:</strong> 3.818/4.0. Full coursework is listed in my <a href="/cv/">CV</a>.</p>
 
 ## Experience {#experience}
 
-- *2026.06 - 2026.09*, **Independent Project Lead and Early Technical Team Member**, Hangzhou Yuanxi Technology. Contributed end to end across the frontend, backend, and runtime of [ManySelves](https://github.com/csxq0605/manyselves), independently designing and implementing its runtime kernel and capability packages. ManySelves is a recoverable local runtime for file-defined agent teams: identities, skills, tasks, contracts, and workflows are declared in Markdown, YAML, and JSON Schema, compiled into a frozen plan, and executed by a stateless kernel. Its bundled power-distribution safety reporting capability splits work so that code handles structure (grouping, citations, gap classification, reconciliation, assembly) while the model makes the professional judgments in a judgment ledger, and revisions produce a new version under the same run, reopening only the modules whose facts changed.
-- *2026.03 - now*, **Undergraduate Researcher**, AI + Fusion Energy Series Project, Xinao Technology Innovation Center, Peking University. Studying long-horizon research autonomy: preserving executable research state across interruptions and advancing only through independent evidence. The project develops four layers for orchestration/execution, evidence/verification, memory/evolution, and governance/collaboration; Nexgent provides the long-running substrate and can monitor long fusion simulations. PIs: Prof. Yunfeng Liang and [Prof. Songfang Huang](https://www.coe.pku.edu.cn/teaching/all_time/13007.html).
-- *2025.05 - now*, **Undergraduate Researcher**, Combustion Laboratory, Peking University. Studying multiscale combustion processes and the complementary roles of mechanistic and data-driven models under [Prof. Zheng Chen](https://www.coe.pku.edu.cn/teaching/all_time/7195.html).
+{% include home/timeline.html items=site.data.experience %}
 
 ## Publications {#publications}
 
