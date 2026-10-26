@@ -178,15 +178,28 @@ async function main() {
   }
 
   // Province detail maps for the inset (one Mercator projection per province) --
+  // Taiwan's counties come from Natural Earth admin-1 (DataV has no subdivisions for
+  // it); ids are ISO 3166-2 codes such as TW-TPE. Natural Earth lacks Lienchiang
+  // (Matsu); places without a shape can be given lat / lng in footprints.yml.
   for (const p of cnFeatures) {
-    let src;
-    try { src = await cached(`datav_${p.id}_full.json`, DATAV + `${p.id}_full.json`); }
-    catch { src = await cached(`datav_${p.id}.json`, DATAV + `${p.id}.json`); }   // no subdivisions (Taiwan)
-    const parts = await shape(src, '-filter-fields adcode,name -simplify 6% keep-shapes');
-    const fp = geoMercator().fitExtent([[INSET.pad, INSET.pad], [INSET.width - INSET.pad, INSET.height - INSET.pad]], parts);
+    let parts;
+    if (p.id === '710000') {
+      parts = await shape({ type: 'FeatureCollection', features: admin1.features.filter(f => f.properties.adm0_a3 === 'TWN') },
+        '-each "adcode = iso_3166_2; name = name_zh" -filter-fields adcode,name -simplify 6% keep-shapes');
+    } else {
+      const src = await cached(`datav_${p.id}_full.json`, DATAV + `${p.id}_full.json`);
+      parts = await shape(src, '-filter-fields adcode,name -simplify 6% keep-shapes');
+    }
+    // Taiwan's frame also takes in Matsu (Lienchiang), which has no shape here.
+    const frame = p.id === '710000'
+      ? { type: 'FeatureCollection', features: [...parts.features, { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [119.95, 26.16] } }] }
+      : parts;
+    const fp = geoMercator().fitExtent([[INSET.pad, INSET.pad], [INSET.width - INSET.pad, INSET.height - INSET.pad]], frame);
     const inset = geoPath(fp).digits(1);
     report.push([`cn-${p.id}.json`, await write(`cn-${p.id}.json`, {
       id: p.id, name: p.name, zh: p.zh, width: INSET.width, height: INSET.height,
+      // Mercator scale / translate, so the page can place points given as lat / lng.
+      projection: { scale: fp.scale(), translate: fp.translate() },
       parts: parts.features.map(f => ({ id: String(f.properties.adcode), zh: f.properties.name, d: inset(f), c: inset.centroid(f).map(r) })),
     })]);
   }

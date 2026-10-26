@@ -605,7 +605,8 @@ button.atlas__crumb:hover { text-decoration-color: currentColor; }
 }
 .atlas__tip[hidden], .atlas__loading[hidden], .atlas__inset[hidden] { display: none; }
 .atlas__inset {
-  position: absolute; right: 10px; bottom: 10px; z-index: 2; width: min(260px, 40%);
+  position: absolute; right: 10px; top: 50px; z-index: 2; width: min(260px, 40%);
+  max-height: calc(100% - 60px); overflow-y: auto; overscroll-behavior: contain;
   padding: 10px 12px 10px; border: 1px solid var(--line); border-radius: 10px;
   background: var(--surface); box-shadow: var(--shadow);
 }
@@ -794,7 +795,7 @@ button.atlas__crumb:hover { text-decoration-color: currentColor; }
   .atlas__side { display: block; }
   .atlas__zoom button { width: 44px; height: 44px; }
   .atlas__map { aspect-ratio: 5 / 3; }
-  .atlas__inset, .atlas.inset-left .atlas__inset { position: static; grid-column: 1 / -1; width: auto; box-shadow: none; }
+  .atlas__inset, .atlas.inset-left .atlas__inset { position: static; grid-column: 1 / -1; width: auto; max-height: none; box-shadow: none; }
   .atlas__inset .icon-button { width: 44px; height: 44px; min-width: 44px; }
   .atlas__inset-map { max-width: 400px; margin: 0 auto; }
   .lab__controls { grid-template-columns: 1fr; }

@@ -25,6 +25,11 @@
     for (var k in attrs) n.setAttribute(k, attrs[k]);
     return n;
   }
+  // d3 geoMercator with the scale / translate stored in each province detail map.
+  function mercator(p, lng, lat) {
+    var r = Math.PI / 180;
+    return [p.translate[0] + p.scale * lng * r, p.translate[1] - p.scale * Math.log(Math.tan(Math.PI / 4 + lat * r / 2))];
+  }
   function fmt(n) { return Number(n).toLocaleString('en-US'); }
   var cache = {};
   function load(name) {
@@ -56,7 +61,8 @@
       if (r.counts_as) counted[r.counts_as] = r.name;
       if (r.home) home = { country: c.code, region: String(r.id) };
       if (c.code === 'CN') cnProvinces++;
-      cities += (r.cities || []).length;
+      // Cities: prefecture-level cities listed, or a division that is itself a city.
+      cities += (r.cities || []).length || (r.city ? 1 : 0);
     });
   });
   var countedCodes = Object.keys(counted);
@@ -312,11 +318,14 @@
         p.setAttribute('aria-label', c.name + ', visited' + (LAYERS[c.id] ? ' — open its provinces' : ''));
       }
     });
+    // Redrawing removes the chip or shape that had focus; keep focus in the map.
+    var hadFocus = root.contains(document.activeElement) && !inset.contains(document.activeElement);
     renderCountryLayer();
     renderMarks();
     renderCrumbs();
     renderSide();
     renderChips();
+    if (hadFocus && !root.contains(document.activeElement)) $('[data-crumbs] .is-current').focus({ preventScroll: true });
   }
   // Keyboard for country paths (bound once).
   gWorld.addEventListener('keydown', function (e) {
@@ -333,7 +342,7 @@
     var whole = !Object.keys(visited).length;
     layer.regions.forEach(function (r) {
       var v = visited[r.id];
-      var p = svg('path', { d: r.d, class: 'atlas__region' + (v ? ' is-visited' : '') + (whole ? ' is-whole' : '') + (v && v.home ? ' is-home' : '') + (state.province === r.id ? ' is-selected' : '') });
+      var p = svg('path', { d: r.d, 'data-id': r.id, class: 'atlas__region' + (v ? ' is-visited' : '') + (whole ? ' is-whole' : '') + (v && v.home ? ' is-home' : '') + (state.province === r.id ? ' is-selected' : '') });
       var label = (v && v.name) || r.name;
       var both = r.zh && r.zh !== label ? label + ' ' + r.zh : label;
       hover(p, function () { return both + (v ? (v.home ? ' · home' : ' · visited') : ''); });
@@ -390,6 +399,7 @@
       } else {
         var s = el('span', 'atlas__crumb is-current', p.label);
         s.setAttribute('aria-current', 'location');
+        s.tabIndex = -1;
         nav.appendChild(s);
       }
     });
@@ -411,7 +421,7 @@
     if (state.tab === 'footprints') {
       metric('Countries / regions', String(countedCodes.length));
       metric('Chinese provinces', cnProvinces + ' / 34');
-      metric('Cities noted', String(cities));
+      metric('Cities in China', String(cities));
       metric('Of the world', (countedCodes.length / WORLD_REGIONS * 100).toFixed(1) + '%');
       var open = state.country && visitedCountries[state.country];
       if (!open) note.textContent = 'Based in Beijing. Click a highlighted country to zoom in.';
@@ -476,7 +486,10 @@
     (entry.regions || []).forEach(function (r) {
       chip(r.name, r.home ? 'Home' : (r.cities && r.cities.length ? r.cities.length + (r.cities.length === 1 ? ' city' : ' cities') : ''), function () {
         var shape = layer && layer.regions.filter(function (x) { return x.id === String(r.id); })[0];
-        if (shape) openProvince(shape);
+        if (!shape) return;
+        // China's provinces open a city window; elsewhere, zoom to the state.
+        if (layer.id === 'CN') openProvince(shape);
+        else animateTo(fitBox(shape.box, 0.6));
       }, state.province === String(r.id));
     });
   }
@@ -524,9 +537,13 @@
   }
   function closeInsetOnly() { inset.hidden = true; root.classList.remove('has-inset'); }
   function closeProvince() {
+    var from = state.province, hadFocus = inset.contains(document.activeElement);
     state.province = null;
     closeInsetOnly();
     render();
+    // Keep keyboard focus in the map: back on the province the window came from.
+    var back = from && gCountry.querySelector('[data-id="' + from + '"]');
+    if (hadFocus && back) back.focus({ preventScroll: true });
   }
 
   // Province detail: prefectures, visited cities shaded and labelled.
@@ -556,22 +573,42 @@
         p.appendChild(t);
         insetMap.appendChild(p);
       });
-      Object.keys(cityIds).forEach(function (id) {
-        var part = detail.parts.filter(function (x) { return x.id === id; })[0];
-        if (!part) return;
-        insetMap.appendChild(svg('circle', { cx: part.c[0], cy: part.c[1], r: 5, class: 'atlas__city' }));
-        var label = svg('text', { x: part.c[0] + 8, y: part.c[1] + 6, class: 'atlas__city-label' });
-        label.textContent = cityIds[id];
-        insetMap.appendChild(label);
-        var li = el('li', '', cityIds[id]);
-        li.appendChild(el('span', '', part.zh));
+      // Dots first, then labels placed where they do not overlap one another; a
+      // label that fits nowhere is left out (the list below names every city).
+      var placed = [], labels = [];
+      ((v && v.cities) || []).forEach(function (city) {
+        var part = detail.parts.filter(function (x) { return x.id === String(city.id); })[0];
+        var at = part ? part.c : (detail.projection && city.lat != null ? mercator(detail.projection, city.lng, city.lat) : null);
+        if (at) {
+          insetMap.appendChild(svg('circle', { cx: at[0], cy: at[1], r: 5, class: 'atlas__city' }));
+          labels.push({ at: at, name: city.name });
+        }
+        var li = el('li', '', city.name);
+        li.appendChild(el('span', '', part ? part.zh : (city.zh || '')));
         $('[data-inset-list]').appendChild(li);
+      });
+      labels.forEach(function (l) {
+        var text = svg('text', { class: 'atlas__city-label' });
+        text.textContent = l.name;
+        insetMap.appendChild(text);
+        var w = text.getComputedTextLength ? text.getComputedTextLength() : l.name.length * 9;
+        var spots = [[8, 6], [-8 - w, 6], [-w / 2, -10], [-w / 2, 22]];
+        for (var i = 0; i < spots.length; i++) {
+          text.setAttribute('x', (l.at[0] + spots[i][0]).toFixed(1));
+          text.setAttribute('y', (l.at[1] + spots[i][1]).toFixed(1));
+          var bb = text.getBBox(), b = { x: bb.x - 1, y: bb.y, w: bb.width + 2, h: bb.height };
+          var inside = b.x >= 0 && b.y >= 0 && b.x + b.w <= detail.width && b.y + b.h <= detail.height;
+          var clear = placed.every(function (o) { return b.x >= o.x + o.w || o.x >= b.x + b.w || b.y >= o.y + o.h || o.y >= b.y + b.h; });
+          if (inside && clear) { placed.push(b); return; }
+        }
+        insetMap.removeChild(text);
       });
       var note = $('[data-inset-note]');
       if (!v) note.textContent = 'Not visited yet.';
       else if (v.home) note.textContent = 'Home — where I live and study.';
-      else if (whole) note.textContent = 'Visited. Cities not noted separately.';
-      else note.textContent = Object.keys(cityIds).length + ' ' + (Object.keys(cityIds).length === 1 ? 'city' : 'cities') + ' visited:';
+      else if (whole && !v.city) note.textContent = 'Visited. Cities not noted separately.';
+      else if (v.city) note.textContent = 'Visited.';
+      else note.textContent = v.cities.length + ' ' + (v.cities.length === 1 ? 'city' : 'cities') + ' visited:';
     }).catch(function () { $('[data-inset-note]').textContent = 'Detail map unavailable.'; });
     $('[data-inset-close]').focus({ preventScroll: true });
   }

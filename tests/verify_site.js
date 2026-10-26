@@ -171,7 +171,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     const crumbs = async () => (await p.locator('[data-crumbs]').innerText()).replace(/\s+/g, ' ').trim();
     const viewBox = async () => (await p.locator('[data-map]').getAttribute('viewBox')).split(' ').map(Number);
     await p.waitForSelector('[data-layer="world"] path');
-    assert.deepStrictEqual(await texts(p, '[data-metrics] dd'), ['8', '16 / 34', '4', '3.2%']);
+    assert.deepStrictEqual(await texts(p, '[data-metrics] dd'), ['8', '22 / 34', '77', '3.2%']);
     assert.strictEqual(await crumbs(), 'World');
     const worldView = await viewBox();
     // Kashmir is drawn uncoloured; the South China Sea dashed line is present.
@@ -182,26 +182,37 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     await p.keyboard.press('Enter');
     await p.waitForSelector('[data-layer="country"] .atlas__region');
     assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region').count(), 34);
-    assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region.is-visited').count(), 16);
+    assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region.is-visited').count(), 22);
     assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region.is-home').count(), 1);
     assert.ok((await p.locator('[data-layer="country"] .atlas__dash').getAttribute('d')).length > 100);
     assert.strictEqual(await crumbs(), 'World › China');
     assert.ok((await viewBox())[2] < worldView[2] / 2, 'zoomed in to China');
-    // Province detail with the four Xinjiang cities.
+    // Province detail with the Xinjiang cities.
     await p.locator('.chip', { hasText: 'Xinjiang' }).click();
     await p.waitForSelector('[data-inset-map] .atlas__part');
     assert.strictEqual(await crumbs(), 'World › China › Xinjiang');
-    assert.deepStrictEqual(await p.locator('[data-inset-list] li').evaluateAll(ls => ls.map(l => l.firstChild.textContent).sort()), ['Ili', 'Kashgar', 'Turpan', 'Ürümqi']);
-    assert.strictEqual(await p.locator('[data-inset-map] .atlas__part.is-visited').count(), 4);
-    assert.strictEqual(await p.locator('[data-inset-map] .atlas__city-label').count(), 4);
+    assert.deepStrictEqual(await p.locator('[data-inset-list] li').evaluateAll(ls => ls.map(l => l.firstChild.textContent)), ['Ürümqi', 'Turpan', 'Hami', 'Bayingolin', 'Aksu', 'Kashgar', 'Hotan', 'Ili', 'Tacheng', 'Altay', 'Shihezi']);
+    assert.strictEqual(await p.locator('[data-inset-map] .atlas__part.is-visited').count(), 11);
+    assert.strictEqual(await p.locator('[data-inset-map] .atlas__city').count(), 11);
+    // City labels never overlap; any that cannot fit are left to the list.
+    const boxes = await p.locator('[data-inset-map] .atlas__city-label').evaluateAll(ts => ts.map(t => t.getBBox()).map(b => [b.x, b.y, b.width, b.height]));
+    assert.ok(boxes.length >= 8, 'most labels placed: ' + boxes.length);
+    for (const [i, a] of boxes.entries()) for (const b of boxes.slice(i + 1)) assert.ok(a[0] + a[2] <= b[0] || b[0] + b[2] <= a[0] || a[1] + a[3] <= b[1] || b[1] + b[3] <= a[1], 'labels overlap');
     await p.keyboard.press('Escape');
     assert.ok(await p.locator('[data-inset]').isHidden());
     assert.strictEqual(await crumbs(), 'World › China');
-    // A province without listed cities is shaded as a whole.
-    await p.locator('.chip', { hasText: 'Guangdong' }).click();
+    // A municipality is shaded as a whole.
+    await p.locator('.chip', { hasText: 'Tianjin' }).click();
     await p.waitForSelector('[data-inset-map] .atlas__part');
-    assert.match(await p.locator('[data-inset-note]').textContent(), /Cities not noted separately/);
+    assert.strictEqual(await p.locator('[data-inset-note]').textContent(), 'Visited.');
     assert.strictEqual(await p.locator('[data-inset-map] .atlas__part:not(.is-visited)').count(), 0);
+    // Taiwan's counties, including Matsu (Lienchiang), which is placed by coordinates.
+    await p.locator('.chip', { hasText: 'Taiwan' }).click();
+    await p.waitForFunction(() => document.querySelectorAll('[data-inset-list] li').length === 15);
+    assert.strictEqual(await p.locator('[data-inset-map] .atlas__city').count(), 15);
+    assert.strictEqual(await p.locator('[data-inset-map] .atlas__part.is-visited').count(), 14);
+    const matsu = await p.locator('[data-inset-map] .atlas__city').last().evaluate(c => [+c.getAttribute('cx'), +c.getAttribute('cy')]);
+    assert.ok(matsu[0] > 0 && matsu[0] < 400 && matsu[1] > 0 && matsu[1] < 300, 'Matsu inside the window');
     // Zoom buttons, then the breadcrumb back to the world.
     const before = await viewBox();
     await p.getByRole('button', { name: 'Zoom in' }).click();
@@ -210,7 +221,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     assert.ok(await p.locator('[data-inset]').isHidden());
     assert.strictEqual(await crumbs(), 'World');
     assert.deepStrictEqual(await viewBox(), worldView);
-    // Hong Kong opens China with its detail; Japan has no places listed, so it is shaded whole.
+    // Hong Kong opens China with its detail; Japan is shaded by prefecture.
     await p.locator('.chip', { hasText: 'Hong Kong' }).click();
     await p.waitForSelector('[data-inset-map] .atlas__part');
     assert.strictEqual(await crumbs(), 'World › China › Hong Kong');
@@ -219,8 +230,11 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     assert.strictEqual(await crumbs(), 'World');
     await p.locator('.chip', { hasText: 'Japan' }).click();
     await p.waitForSelector('[data-layer="country"] .atlas__region');
-    assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region:not(.is-whole)').count(), 0);
-    assert.match(await p.locator('[data-note]').textContent(), /not noted separately/);
+    assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region.is-visited').count(), 7);
+    assert.strictEqual(await p.evaluate(() => document.activeElement.textContent), 'Japan', 'focus stays in the map after a chip redraw');
+    assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region.is-whole').count(), 0);
+    await p.locator('.chip', { hasText: 'Osaka' }).click();
+    assert.ok(await p.locator('[data-inset]').isHidden(), 'no city window outside China');
     assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     // Visitors: switching tabs returns to the world view.
     await p.getByRole('tab', { name: 'Visitors' }).click();
@@ -239,7 +253,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     assert.ok(await p.locator('[data-demo-badge]').isHidden());
     assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     assert.deepStrictEqual(p.errors, []);
-    console.log('PASS explore: world → China → Xinjiang cities, Esc and breadcrumb back, zoom, whole-country shading, visitors tab');
+    console.log('PASS explore: world → China → Xinjiang cities, Esc and breadcrumb back, zoom, Tianjin and Taiwan windows, Japan prefectures, visitors tab');
     await p.context().close();
   }
 
