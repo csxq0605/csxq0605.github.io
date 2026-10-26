@@ -284,6 +284,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     ['real data', 200, { regions: [{ name: 'China', code: 'CN', lat: 35.9, lng: 104.2, visits: 12 }], unlocated_visits: 3, updated_at: '2026-10-25T08:00:00Z', period_start: '2026-10-01' }, ['15', '1']],
     ['malformed rows dropped', 200, { regions: [{ name: 'X', code: 'xx', visits: 2 }, { name: 'Y', code: 'YY', visits: -1 }, { name: 'Z', code: 'ZZ', visits: 1.5 }, { code: 'QQ', visits: 1 }] }, ['0', '0']],
     ['server error', 503, {}, ['—', '—']],
+    ['not exported yet', 404, {}, ['—', '—']],
   ]) {
     const p = await page(browser, 1024);
     await p.route(u => u.pathname === '/explore/', async r => {
@@ -300,6 +301,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
       assert.match(await p.locator('[data-caption]').textContent(), /since 2026-10-01; 3 without a known location\. Updated 2026-10-25 08:00 UTC/);
     }
     if (label === 'server error') assert.match(await p.locator('[data-note]').textContent(), /unavailable/);
+    if (label === 'not exported yet') assert.match(await p.locator('[data-note]').textContent(), /Counting has started/);
     console.log('PASS visitor endpoint:', label);
     await p.context().close();
   }
