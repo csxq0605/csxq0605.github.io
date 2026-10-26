@@ -4,7 +4,9 @@
 # travel: places I have been. Add entries like:
 #   - name: Kyoto
 #     country: Japan
-#     code: JP            # ISO 3166-1 alpha-2, used to count countries / regions
+#     code: JP            # ISO 3166-1 alpha-2, used to count countries / regions.
+#                         # Hong Kong (HK), Macao (MO) and Taiwan (TW) count as
+#                         # their own regions, matching the visitor map.
 #     lat: 35.01
 #     lng: 135.77
 #     year: 2025          # optional
