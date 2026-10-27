@@ -37,6 +37,21 @@ def load_config(path):
     return site, start
 
 
+def api_error(error, token):
+    """GoatCounter's own error message from an HTTP error response, e.g.
+    {"error": "unknown token"}, with the token blanked out just in case."""
+    try:
+        body = error.read(2000).decode("utf-8", "replace")
+    except Exception:  # noqa: BLE001 - the status line is still reported
+        body = ""
+    try:
+        data = json.loads(body)
+        message = data.get("error") or json.dumps(data.get("errors") or data)
+    except (ValueError, AttributeError):
+        message = " ".join(body.split())[:300] or error.reason
+    return str(message).replace(token, "***") if token else str(message)
+
+
 def fetch_locations(base_url, token, start, end, opener=urllib.request.urlopen, sleep=time.sleep):
     """Return GoatCounter location rows across all pages."""
     rows = []
@@ -47,7 +62,8 @@ def fetch_locations(base_url, token, start, end, opener=urllib.request.urlopen, 
         url = base_url.rstrip("/") + "/api/v0/stats/locations?" + urllib.parse.urlencode(query)
         request = urllib.request.Request(url, headers={
             "Authorization": "Bearer " + token,
-            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Content-Type": "application/json",  # makes GoatCounter answer errors in JSON
             "User-Agent": "csxq0605.github.io visitor-atlas",
         })
         for attempt in range(3):
@@ -59,7 +75,7 @@ def fetch_locations(base_url, token, start, end, opener=urllib.request.urlopen, 
                 if error.code == 429 and attempt < 2:  # rate limited
                     sleep(int(error.headers.get("X-Rate-Limit-Reset", "10") or 10) + 1)
                     continue
-                raise
+                raise ValueError("GoatCounter answered HTTP {}: {}".format(error.code, api_error(error, token)))
         stats = payload.get("stats")
         if not isinstance(stats, list):
             raise ValueError("unexpected API response: no stats list")
