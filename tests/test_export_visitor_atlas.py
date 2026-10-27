@@ -1,4 +1,6 @@
 """Tests for scripts/export_visitor_atlas.py. Run: python3 -m unittest discover tests"""
+import contextlib
+import io
 import json
 import os
 import sys
@@ -19,8 +21,19 @@ PAGES = [
 ]
 
 
+@contextlib.contextmanager
+def _capture_stderr():
+    buf, old = io.StringIO(), sys.stderr
+    sys.stderr = buf
+    try:
+        yield buf
+    finally:
+        sys.stderr = old
+
+
 class FakeGoatCounter(BaseHTTPRequestHandler):
     status = 200
+    error_body = b""
     seen = []
 
     def do_GET(self):
@@ -30,6 +43,7 @@ class FakeGoatCounter(BaseHTTPRequestHandler):
         if self.status != 200:
             self.send_response(self.status)
             self.end_headers()
+            self.wfile.write(self.error_body)
             return
         body = json.dumps(PAGES[int(query["offset"][0]) // exporter.PAGE_SIZE]).encode()
         self.send_response(200)
@@ -43,7 +57,7 @@ class FakeGoatCounter(BaseHTTPRequestHandler):
 
 class ExportTest(unittest.TestCase):
     def setUp(self):
-        FakeGoatCounter.status, FakeGoatCounter.seen = 200, []
+        FakeGoatCounter.status, FakeGoatCounter.error_body, FakeGoatCounter.seen = 200, b"", []
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), FakeGoatCounter)
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
         self.base = "http://127.0.0.1:{}".format(self.server.server_port)
@@ -89,6 +103,14 @@ class ExportTest(unittest.TestCase):
         FakeGoatCounter.status = 500
         self.assertEqual(self.run_export(), 1)
         self.assertEqual(self.output.read_text(), "previous")
+
+    def test_api_error_message_is_reported_without_the_token(self):
+        FakeGoatCounter.status = 404
+        FakeGoatCounter.error_body = json.dumps({"error": "not found: test-token"}).encode()
+        with _capture_stderr() as err:
+            self.assertEqual(self.run_export(), 1)
+        self.assertIn("HTTP 404: not found: ***", err.getvalue())
+        self.assertNotIn("test-token", err.getvalue())
 
     def test_invalid_count_rejected(self):
         with self.assertRaises(ValueError):
