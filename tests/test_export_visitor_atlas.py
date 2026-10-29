@@ -34,13 +34,15 @@ def _capture_stderr():
 class FakeGoatCounter(BaseHTTPRequestHandler):
     status = 200
     error_body = b""
+    fail_first = 0  # answer this many requests with `status` before succeeding
     seen = []
 
     def do_GET(self):
         url = urlparse(self.path)
         query = parse_qs(url.query)
         FakeGoatCounter.seen.append((url.path, query, self.headers.get("Authorization")))
-        if self.status != 200:
+        failing = self.status != 200 and (not FakeGoatCounter.fail_first or len(FakeGoatCounter.seen) <= FakeGoatCounter.fail_first)
+        if failing:
             self.send_response(self.status)
             self.end_headers()
             self.wfile.write(self.error_body)
@@ -58,6 +60,10 @@ class FakeGoatCounter(BaseHTTPRequestHandler):
 class ExportTest(unittest.TestCase):
     def setUp(self):
         FakeGoatCounter.status, FakeGoatCounter.error_body, FakeGoatCounter.seen = 200, b"", []
+        FakeGoatCounter.fail_first = 0
+        self.waits = []
+        self._sleep = exporter.time.sleep
+        exporter.time.sleep = self.waits.append  # no real waiting in tests
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), FakeGoatCounter)
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
         self.base = "http://127.0.0.1:{}".format(self.server.server_port)
@@ -67,6 +73,7 @@ class ExportTest(unittest.TestCase):
         os.environ["GOATCOUNTER_API_TOKEN"] = "test-token"
 
     def tearDown(self):
+        exporter.time.sleep = self._sleep
         self.server.shutdown()
         self.server.server_close()
         self.tmp.cleanup()
@@ -111,6 +118,23 @@ class ExportTest(unittest.TestCase):
             self.assertEqual(self.run_export(), 1)
         self.assertIn("HTTP 404: not found: ***", err.getvalue())
         self.assertNotIn("test-token", err.getvalue())
+
+    def test_transient_not_found_is_retried(self):
+        FakeGoatCounter.status, FakeGoatCounter.fail_first = 404, 1
+        with _capture_stderr():
+            self.assertEqual(self.run_export(), 0)
+        self.assertEqual(self.waits, [30])
+        self.assertEqual(json.loads(self.output.read_text())["regions"][0]["code"], "CN")
+
+    def test_gives_up_after_three_attempts(self):
+        self.output.write_text("previous")
+        FakeGoatCounter.status = 404
+        with _capture_stderr() as err:
+            self.assertEqual(self.run_export(), 1)
+        self.assertEqual(self.waits, [30, 120])
+        self.assertEqual(len(FakeGoatCounter.seen), 3)
+        self.assertIn("HTTP 404", err.getvalue())
+        self.assertEqual(self.output.read_text(), "previous")
 
     def test_invalid_count_rejected(self):
         with self.assertRaises(ValueError):

@@ -26,6 +26,11 @@ ROOT = Path(__file__).resolve().parents[1]
 CENTROIDS = Path(__file__).resolve().parent / "data" / "country-centroids.json"
 PAGE_SIZE = 100
 MAX_PAGES = 10  # 1,000 rows is far more than there are countries
+# GoatCounter sometimes answers a valid request with "404 not found" (seen on
+# two nightly runs; the same request worked at other times), so retry that and
+# server errors after a pause.
+RETRY_CODES = (404, 500, 502, 503, 504)
+RETRY_WAITS = (30, 120)  # seconds before the 2nd and 3rd attempt
 
 
 def load_config(path):
@@ -52,8 +57,9 @@ def api_error(error, token):
     return str(message).replace(token, "***") if token else str(message)
 
 
-def fetch_locations(base_url, token, start, end, opener=urllib.request.urlopen, sleep=time.sleep):
+def fetch_locations(base_url, token, start, end, opener=urllib.request.urlopen, sleep=None):
     """Return GoatCounter location rows across all pages."""
+    sleep = sleep or time.sleep
     rows = []
     for page in range(MAX_PAGES):
         query = {"limit": PAGE_SIZE, "offset": page * PAGE_SIZE, "end": end}
@@ -66,16 +72,22 @@ def fetch_locations(base_url, token, start, end, opener=urllib.request.urlopen, 
             "Content-Type": "application/json",  # makes GoatCounter answer errors in JSON
             "User-Agent": "csxq0605.github.io visitor-atlas",
         })
-        for attempt in range(3):
+        for attempt in range(len(RETRY_WAITS) + 1):
             try:
                 with opener(request, timeout=30) as response:
                     payload = json.load(response)
                 break
             except urllib.error.HTTPError as error:
-                if error.code == 429 and attempt < 2:  # rate limited
+                message = "GoatCounter answered HTTP {}: {}".format(error.code, api_error(error, token))
+                if attempt == len(RETRY_WAITS):
+                    raise ValueError(message)
+                if error.code == 429:  # rate limited
                     sleep(int(error.headers.get("X-Rate-Limit-Reset", "10") or 10) + 1)
-                    continue
-                raise ValueError("GoatCounter answered HTTP {}: {}".format(error.code, api_error(error, token)))
+                elif error.code in RETRY_CODES:
+                    print(message + "; retrying in {} s".format(RETRY_WAITS[attempt]), file=sys.stderr)
+                    sleep(RETRY_WAITS[attempt])
+                else:
+                    raise ValueError(message)
         stats = payload.get("stats")
         if not isinstance(stats, list):
             raise ValueError("unexpected API response: no stats list")

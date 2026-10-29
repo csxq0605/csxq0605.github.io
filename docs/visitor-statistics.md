@@ -5,7 +5,7 @@
 ## 原理
 
 1. 网页加载 GoatCounter 的计数脚本，GoatCounter 只记录国家／地区等汇总信息，不保存 IP。
-2. GitHub Actions 每天（北京时间凌晨 3 点）调用 GoatCounter API（`/api/v0/stats/locations`），把各国家／地区的访客数写入本站的 `assets/data/visitor-atlas.json`，只有数字变化时才提交。
+2. GitHub Actions 每天两次（北京时间约凌晨 3 点和下午 3 点；GitHub 的定时任务常会推迟几小时）调用 GoatCounter API（`/api/v0/stats/locations`），把各国家／地区的访客数写入本站的 `assets/data/visitor-atlas.json`，只有数字变化时才提交。
 3. Explore 页面从本站同一域名读取这个 JSON 并绘制地图，不依赖在大陆不稳定的 raw.githubusercontent.com。
 
 ## 开启步骤
@@ -27,5 +27,6 @@
 - 只有开启后的新访问会被记录，此前的访问无法补回。
 - 计数脚本只在 GitHub Pages 的生产构建中加载；本地预览不会计数。
 - 无法定位的访问会计入总数，并在地图说明中注明“无已知位置”的数量。
-- 如果某次导出失败，脚本不会覆盖上一份数据，地图继续显示上次结果。
+- GoatCounter 偶尔会对正常请求返回 404 not found，所以导出脚本遇到 404 和服务器错误时，会等 30 秒、再等 2 分钟各重试一次。
+- 如果某次导出最终失败，脚本不会覆盖上一份数据，地图继续显示上次结果；当天的另一次运行会补上。
 - 访客按国家／地区给地图着色；香港、澳门、台湾的访问计入中国的颜色，但在列表中单独列出。国家名称与代码校验来自 `scripts/data/country-centroids.json`（源自 mledoze/countries，ODbL 许可）。
