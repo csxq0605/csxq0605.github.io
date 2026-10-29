@@ -8,6 +8,15 @@ on:
   schedule:
     - cron: '17 19 * * *'   # 03:17 Beijing time
   workflow_dispatch:
+    inputs:
+      diagnose:
+        description: 'Compare API endpoints and date ranges without publishing data'
+        type: boolean
+        default: false
+      replay_end:
+        description: 'Optional failed request UTC end, e.g. 2026-10-28T23:00:00Z (diagnose only)'
+        type: string
+        default: ''
 
 permissions:
   contents: write
@@ -19,15 +28,32 @@ concurrency:
 jobs:
   export:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Show run context
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          printf 'Event: %s; attempt: %s\n' "$EVENT_NAME" "$RUN_ATTEMPT"
+          git rev-parse HEAD
+          python3 --version
+      - name: Compare endpoints and date ranges
+        if: inputs.diagnose == true
+        env:
+          GOATCOUNTER_API_TOKEN: ${{ secrets.GOATCOUNTER_API_TOKEN }}
+          REPLAY_END: ${{ inputs.replay_end }}
+        run: python3 scripts/diagnose_visitor_atlas.py
       - name: Export country totals
+        if: inputs.diagnose != true
         env:
           GOATCOUNTER_API_TOKEN: ${{ secrets.GOATCOUNTER_API_TOKEN }}
         run: |
           mkdir -p assets/data
           python3 scripts/export_visitor_atlas.py --output assets/data/visitor-atlas.json
       - name: Commit if the numbers changed
+        if: inputs.diagnose != true
         run: |
           [ -f assets/data/visitor-atlas.json ] || { echo "Visitor counting is off."; exit 0; }
           git add assets/data/visitor-atlas.json

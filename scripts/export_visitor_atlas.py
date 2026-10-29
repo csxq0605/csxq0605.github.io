@@ -26,6 +26,40 @@ ROOT = Path(__file__).resolve().parents[1]
 CENTROIDS = Path(__file__).resolve().parent / "data" / "country-centroids.json"
 PAGE_SIZE = 100
 MAX_PAGES = 10  # 1,000 rows is far more than there are countries
+RETRY_DELAYS = (5, 15)
+
+
+def safe_message(value, token):
+    return str(value).replace(token, "***") if token else str(value)
+
+
+def retry_delay(error, attempt):
+    delay = RETRY_DELAYS[attempt]
+    if error.code == 429:
+        try:
+            delay = max(delay, min(60, int(error.headers.get("X-Rate-Limit-Reset", "10")) + 1))
+        except (TypeError, ValueError):
+            pass
+    return delay
+
+
+def diagnose_not_found(base_url, token, opener):
+    """Probe authentication separately; never print the /me response body."""
+    request = urllib.request.Request(base_url.rstrip("/") + "/api/v0/me", headers={
+        "Authorization": "Bearer " + token,
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": "csxq0605.github.io visitor-atlas",
+    })
+    try:
+        with opener(request, timeout=10) as response:
+            result = "HTTP {}".format(response.status)
+    except urllib.error.HTTPError as error:
+        result = "HTTP {}".format(error.code)
+        error.close()
+    except (urllib.error.URLError, OSError) as error:
+        result = safe_message(error, token)
+    print("Diagnostic GET /api/v0/me: {} (response body omitted).".format(result), file=sys.stderr)
 
 
 def load_config(path):
@@ -49,11 +83,13 @@ def api_error(error, token):
         message = data.get("error") or json.dumps(data.get("errors") or data)
     except (ValueError, AttributeError):
         message = " ".join(body.split())[:300] or error.reason
-    return str(message).replace(token, "***") if token else str(message)
+    return safe_message(message, token)
 
 
-def fetch_locations(base_url, token, start, end, opener=urllib.request.urlopen, sleep=time.sleep):
+def fetch_locations(base_url, token, start, end, opener=urllib.request.urlopen, sleep=None):
     """Return GoatCounter location rows across all pages."""
+    if sleep is None:
+        sleep = time.sleep
     rows = []
     for page in range(MAX_PAGES):
         query = {"limit": PAGE_SIZE, "offset": page * PAGE_SIZE, "end": end}
@@ -72,10 +108,29 @@ def fetch_locations(base_url, token, start, end, opener=urllib.request.urlopen, 
                     payload = json.load(response)
                 break
             except urllib.error.HTTPError as error:
-                if error.code == 429 and attempt < 2:  # rate limited
-                    sleep(int(error.headers.get("X-Rate-Limit-Reset", "10") or 10) + 1)
+                message = "GoatCounter answered HTTP {}: {} (request: {}; response: {})".format(
+                    error.code, api_error(error, token), safe_message(url, token),
+                    safe_message(error.geturl(), token))
+                error.close()
+                # This endpoint has succeeded with the same code/config between
+                # 404 failures. Retry briefly, but a persistent 404 stays a failure.
+                if error.code in (404, 429, 500, 502, 503, 504) and attempt < len(RETRY_DELAYS):
+                    delay = retry_delay(error, attempt)
+                    print("{}; retrying in {}s (attempt {}/3).".format(message, delay, attempt + 1), file=sys.stderr)
+                    sleep(delay)
                     continue
-                raise ValueError("GoatCounter answered HTTP {}: {}".format(error.code, api_error(error, token)))
+                if error.code == 404:
+                    diagnose_not_found(base_url, token, opener)
+                raise ValueError(message) from None
+            except (urllib.error.URLError, OSError) as error:
+                message = "GoatCounter connection failed: {} (request: {})".format(
+                    safe_message(error, token), safe_message(url, token))
+                if attempt < len(RETRY_DELAYS):
+                    delay = RETRY_DELAYS[attempt]
+                    print("{}; retrying in {}s (attempt {}/3).".format(message, delay, attempt + 1), file=sys.stderr)
+                    sleep(delay)
+                    continue
+                raise ValueError(message) from None
         stats = payload.get("stats")
         if not isinstance(stats, list):
             raise ValueError("unexpected API response: no stats list")

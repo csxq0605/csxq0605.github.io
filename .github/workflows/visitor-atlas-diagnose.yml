@@ -1,0 +1,72 @@
+name: Visitor atlas diagnosis
+
+# Run on the isolated diagnostic branch; no merge or website deployment needed.
+on:
+  push:
+    branches: [fix/visitor-atlas-api-diagnostics]
+    paths:
+      - '.github/workflows/visitor-atlas-diagnose.yml'
+      - 'scripts/diagnose_visitor_atlas.py'
+      - 'scripts/export_visitor_atlas.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      result: ${{ steps.compare.outputs.result }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replay both failed morning windows
+        id: compare
+        env:
+          GOATCOUNTER_API_TOKEN: ${{ secrets.GOATCOUNTER_API_TOKEN }}
+        shell: python
+        run: |
+          import json
+          import os
+          import subprocess
+          import sys
+
+          summaries = []
+          failed = False
+          for end in ('2026-10-28T23:00:00Z', '2026-10-29T02:00:00Z'):
+              result = subprocess.run(
+                  [sys.executable, 'scripts/diagnose_visitor_atlas.py', '--replay-end', end],
+                  capture_output=True, text=True,
+              )
+              print(result.stdout, end='', flush=True)
+              print(result.stderr, end='', file=sys.stderr, flush=True)
+              statuses = {}
+              for line in result.stdout.splitlines():
+                  row = json.loads(line)
+                  if 'case' in row:
+                      statuses[row['case']] = row['status']
+              selected = [('auth', 'authentication'), ('now', 'locations-current'),
+                          ('replay', 'locations-replay-failed-window')]
+              summaries.append(end[11:13] + 'Z: ' + ', '.join(
+                  name + '=' + str(statuses.get(case, 'unavailable'))
+                  for name, case in selected
+              ))
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+                  summary.write('### Replay end: ' + end + '\n\n```json\n' + result.stdout + '\n```\n')
+              failed |= result.returncode != 0
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('result=' + ' | '.join(summaries) + '\n')
+          sys.exit(int(failed))
+
+  result:
+    if: always()
+    needs: probe
+    name: ${{ needs.probe.outputs.result || 'Probe did not produce a result' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Diagnostic status
+        env:
+          PROBE_RESULT: ${{ needs.probe.result }}
+        run: test "$PROBE_RESULT" = success
