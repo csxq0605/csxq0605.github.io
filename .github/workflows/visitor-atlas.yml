@@ -6,7 +6,7 @@ name: Visitor atlas
 # until _data/analytics.json names a GoatCounter site. See docs/visitor-statistics.md.
 on:
   schedule:
-    - cron: '17 19 * * *'   # 03:17 Beijing time
+    - cron: '30 7 * * *'    # 15:30 Asia/Taipei (UTC+8); GitHub may delay scheduled runs.
   workflow_dispatch:
 
 permissions:
