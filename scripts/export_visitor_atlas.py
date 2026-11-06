@@ -19,13 +19,30 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CENTROIDS = Path(__file__).resolve().parent / "data" / "country-centroids.json"
 PAGE_SIZE = 100
 MAX_PAGES = 10  # 1,000 rows is far more than there are countries
+# Hosted GoatCounter often answers a valid stats request with "404 not found"
+# and the same request works hours later (goatcounter issue #925, open: the
+# maintainer suspects a time-zone / change-of-day bug on their side). So:
+# don't send `end` (the time value suspected there), retry 404 and server errors
+# after a pause, and if it still fails while the published data is recent, warn
+# instead of failing the run.
+RETRY_CODES = (404, 500, 502, 503, 504)
+RETRY_WAITS = (30, 120)  # seconds before the 2nd and 3rd attempt
+STALE_AFTER = timedelta(days=3)  # fail the run once the data is this old
+
+
+class ApiError(ValueError):
+    """GoatCounter answered with an HTTP error."""
+
+    def __init__(self, code, message):
+        super().__init__("GoatCounter answered HTTP {}: {}".format(code, message))
+        self.code = code
 
 
 def load_config(path):
@@ -52,11 +69,15 @@ def api_error(error, token):
     return str(message).replace(token, "***") if token else str(message)
 
 
-def fetch_locations(base_url, token, start, end, opener=urllib.request.urlopen, sleep=time.sleep):
-    """Return GoatCounter location rows across all pages."""
+def fetch_locations(base_url, token, start, end=None, opener=urllib.request.urlopen, sleep=None):
+    """Return GoatCounter location rows across all pages. Without `end`,
+    GoatCounter counts up to the end of today."""
+    sleep = sleep or time.sleep
     rows = []
     for page in range(MAX_PAGES):
-        query = {"limit": PAGE_SIZE, "offset": page * PAGE_SIZE, "end": end}
+        query = {"limit": PAGE_SIZE, "offset": page * PAGE_SIZE}
+        if end:
+            query["end"] = end
         if start:
             query["start"] = start + "T00:00:00Z"
         url = base_url.rstrip("/") + "/api/v0/stats/locations?" + urllib.parse.urlencode(query)
@@ -66,16 +87,22 @@ def fetch_locations(base_url, token, start, end, opener=urllib.request.urlopen, 
             "Content-Type": "application/json",  # makes GoatCounter answer errors in JSON
             "User-Agent": "csxq0605.github.io visitor-atlas",
         })
-        for attempt in range(3):
+        for attempt in range(len(RETRY_WAITS) + 1):
             try:
                 with opener(request, timeout=30) as response:
                     payload = json.load(response)
                 break
             except urllib.error.HTTPError as error:
-                if error.code == 429 and attempt < 2:  # rate limited
+                failure = ApiError(error.code, api_error(error, token))
+                if attempt == len(RETRY_WAITS):
+                    raise failure
+                if error.code == 429:  # rate limited
                     sleep(int(error.headers.get("X-Rate-Limit-Reset", "10") or 10) + 1)
-                    continue
-                raise ValueError("GoatCounter answered HTTP {}: {}".format(error.code, api_error(error, token)))
+                elif error.code in RETRY_CODES:
+                    print("{}; retrying in {} s".format(failure, RETRY_WAITS[attempt]), file=sys.stderr)
+                    sleep(RETRY_WAITS[attempt])
+                else:
+                    raise failure
         stats = payload.get("stats")
         if not isinstance(stats, list):
             raise ValueError("unexpected API response: no stats list")
@@ -109,6 +136,15 @@ def build_atlas(rows, centroids, start, now):
     }
 
 
+def published_age(path, now):
+    """How old the data in an earlier export is, or None if there is none."""
+    try:
+        stamp = json.loads(Path(path).read_text())["updated_at"]
+        return now - datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--config", default=ROOT / "_data" / "analytics.json")
@@ -127,10 +163,19 @@ def main(argv=None):
     now = datetime.now(timezone.utc)
     base = args.api_base or "https://{}.goatcounter.com".format(site)
     try:
-        rows = fetch_locations(base, token, start, now.strftime("%Y-%m-%dT%H:00:00Z"))
+        rows = fetch_locations(base, token, start)
         atlas = build_atlas(rows, json.loads(CENTROIDS.read_text()), start, now)
     except (urllib.error.URLError, ValueError, OSError) as error:
         print("Export failed, keeping the previous file: {}".format(error), file=sys.stderr)
+        # Token or request problems need fixing now; GoatCounter's own hiccups
+        # only fail the run once the published numbers are getting old.
+        if isinstance(error, ApiError) and error.code in (400, 401, 403):
+            return 1
+        age = published_age(args.output, now)
+        if age is not None and age < STALE_AFTER:
+            print("::warning::Visitor export failed ({}); the map keeps data from {:.0f} hours ago.".format(
+                error, age.total_seconds() / 3600))
+            return 0
         return 1
     Path(args.output).write_text(json.dumps(atlas, ensure_ascii=False, indent=1) + "\n")
     total = sum(r["visits"] for r in atlas["regions"]) + atlas["unlocated_visits"]
