@@ -7,7 +7,7 @@ import sys
 import tempfile
 import threading
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -19,6 +19,16 @@ PAGES = [
     {"stats": [{"id": "CN", "name": "China", "count": 10}, {"id": "", "name": "(unknown)", "count": 3}], "more": True},
     {"stats": [{"id": "US", "name": "United States", "count": 4}, {"id": "cn", "name": "China", "count": 2}], "more": False},
 ]
+
+
+@contextlib.contextmanager
+def _capture_stdout():
+    buf, old = io.StringIO(), sys.stdout
+    sys.stdout = buf
+    try:
+        yield buf
+    finally:
+        sys.stdout = old
 
 
 @contextlib.contextmanager
@@ -135,6 +145,38 @@ class ExportTest(unittest.TestCase):
         self.assertEqual(len(FakeGoatCounter.seen), 3)
         self.assertIn("HTTP 404", err.getvalue())
         self.assertEqual(self.output.read_text(), "previous")
+
+    def test_end_is_left_to_goatcounter(self):
+        self.assertEqual(self.run_export(), 0)
+        self.assertTrue(all("end" not in query for _, query, _ in FakeGoatCounter.seen))
+        self.assertEqual(FakeGoatCounter.seen[0][1]["start"], ["2026-10-01T00:00:00Z"])
+
+    def write_previous(self, hours_ago):
+        stamp = datetime.now(timezone.utc) - timedelta(hours=hours_ago)
+        self.output.write_text(json.dumps({"updated_at": stamp.strftime("%Y-%m-%dT%H:%M:%SZ"), "regions": []}))
+        return self.output.read_text()
+
+    def test_failure_with_recent_data_is_only_a_warning(self):
+        previous = self.write_previous(hours_ago=26)
+        FakeGoatCounter.status = 404
+        with _capture_stderr(), _capture_stdout() as out:
+            self.assertEqual(self.run_export(), 0)
+        self.assertIn("::warning::", out.getvalue())
+        self.assertEqual(self.output.read_text(), previous)
+
+    def test_failure_with_old_data_fails(self):
+        self.write_previous(hours_ago=24 * 4)
+        FakeGoatCounter.status = 404
+        with _capture_stderr(), _capture_stdout():
+            self.assertEqual(self.run_export(), 1)
+
+    def test_token_errors_fail_at_once_even_with_recent_data(self):
+        self.write_previous(hours_ago=2)
+        FakeGoatCounter.status = 401
+        with _capture_stderr(), _capture_stdout():
+            self.assertEqual(self.run_export(), 1)
+        self.assertEqual(len(FakeGoatCounter.seen), 1)
+        self.assertEqual(self.waits, [])
 
     def test_invalid_count_rejected(self):
         with self.assertRaises(ValueError):
