@@ -30,6 +30,75 @@
     var r = Math.PI / 180;
     return [p.translate[0] + p.scale * lng * r, p.translate[1] - p.scale * Math.log(Math.tan(Math.PI / 4 + lat * r / 2))];
   }
+  function frameOf(detail, id) {
+    return (detail.frames || []).filter(function (f) { return f.id === id; })[0] || null;
+  }
+  // City names next to their dots, never over another name, dot or box. A name
+  // that does not fit beside its dot goes further out with a thin leader line;
+  // one that fits nowhere is left to the list under the map.
+  function placeLabels(marks, detail) {
+    var R = 6, frames = detail.frames || [];
+    var dots = marks.map(function (m) { return { x: m.at[0] - R, y: m.at[1] - R, w: 2 * R, h: 2 * R }; });
+    var placed = [];
+    var spots = [[9, 6, 'start'], [-9, 6, 'end'], [0, -10, 'middle'], [0, 22, 'middle']];
+    [26, 40, 56].forEach(function (d) {
+      [[1, 0], [-1, 0], [0.7, -0.7], [-0.7, -0.7], [0.7, 0.7], [-0.7, 0.7], [0, -1], [0, 1]].forEach(function (u) {
+        spots.push([u[0] * d, u[1] * d + 5, u[0] > 0.1 ? 'start' : u[0] < -0.1 ? 'end' : 'middle', u]);
+      });
+    });
+    function overlaps(a, b) { return !(a.x >= b.x + b.w || b.x >= a.x + a.w || a.y >= b.y + b.h || b.y >= a.y + a.h); }
+    // Leader lines may not cross a name, another dot or another leader line.
+    function crosses(p, q, r, s) {
+      function side(a, b, c) { return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]); }
+      return side(p, q, r) * side(p, q, s) < 0 && side(r, s, p) * side(r, s, q) < 0;
+    }
+    function lineHits(p, q, box) {
+      var c = [[box.x, box.y], [box.x + box.w, box.y], [box.x + box.w, box.y + box.h], [box.x, box.y + box.h]];
+      return crosses(p, q, c[0], c[1]) || crosses(p, q, c[1], c[2]) || crosses(p, q, c[2], c[3]) || crosses(p, q, c[3], c[0]);
+    }
+    var leaders = [];
+    // Names are placed in footprints.yml order, so the places listed first
+    // (e.g. Taipei) get the free spots when dots are crowded.
+    marks.forEach(function (_, i) {
+      var m = marks[i];
+      var area = m.frame ? { x: m.frame.x + 2, y: m.frame.y + 30, w: m.frame.w - 4, h: m.frame.h - 32 } : { x: 0, y: 0, w: detail.width, h: detail.height };
+      var blocks = placed.concat(dots.filter(function (_, j) { return j !== i; }));
+      if (!m.frame) blocks = blocks.concat(frames.map(function (f) { return { x: f.x, y: f.y, w: f.w, h: f.h }; }));
+      // Many places in one window (Taiwan): smaller names so more of them fit.
+      var text = svg('text', { class: 'atlas__city-label' + (marks.length > 10 ? ' is-small' : '') });
+      text.textContent = m.name;
+      insetMap.appendChild(text);
+      for (var k = 0; k < spots.length; k++) {
+        var s = spots[k];
+        text.setAttribute('x', (m.at[0] + s[0]).toFixed(1));
+        text.setAttribute('y', (m.at[1] + s[1]).toFixed(1));
+        text.setAttribute('text-anchor', s[2]);
+        var bb = text.getBBox(), b = { x: bb.x - 1, y: bb.y, w: bb.width + 2, h: bb.height };
+        var inside = b.x >= area.x && b.y >= area.y && b.x + b.w <= area.x + area.w && b.y + b.h <= area.y + area.h;
+        if (!inside || blocks.some(function (o) { return overlaps(b, o); })) continue;
+        var line = null;
+        if (s[3]) {
+          // Leader line from the dot's edge to the near edge of the name.
+          var from = [m.at[0] + s[3][0] * R, m.at[1] + s[3][1] * R];
+          var to = [s[2] === 'start' ? b.x : s[2] === 'end' ? b.x + b.w : b.x + b.w / 2, s[3][1] < -0.1 ? b.y + b.h : s[3][1] > 0.1 ? b.y : b.y + b.h / 2];
+          var tangled = placed.some(function (o) { return lineHits(from, to, o); }) ||
+            dots.some(function (o, j) { return j !== i && lineHits(from, to, o); }) ||
+            leaders.some(function (l) { return crosses(from, to, l[0], l[1]); });
+          if (tangled) continue;
+          line = [from, to];
+        }
+        // A new name may not sit on an existing leader line either.
+        if (leaders.some(function (l) { return lineHits(l[0], l[1], b); })) continue;
+        placed.push(b);
+        if (line) {
+          leaders.push(line);
+          insetMap.insertBefore(svg('line', { x1: line[0][0].toFixed(1), y1: line[0][1].toFixed(1), x2: line[1][0].toFixed(1), y2: line[1][1].toFixed(1), class: 'atlas__leader' }), text);
+        }
+        return;
+      }
+      insetMap.removeChild(text);
+    });
+  }
   function fmt(n) { return Number(n).toLocaleString('en-US'); }
   var cache = {};
   function load(name) {
@@ -52,6 +121,7 @@
   var regionsByCountry = {};            // code → { regionId → region }
   var counted = {};                     // codes counted as countries / regions
   var cities = 0, cnProvinces = 0, home = null;
+  var allCities = {};                   // city id → city entry, across provinces
   trips.forEach(function (c) {
     visitedCountries[c.code] = c;
     counted[c.code] = c.name;
@@ -63,6 +133,7 @@
       if (c.code === 'CN') cnProvinces++;
       // Cities: prefecture-level cities listed, or a division that is itself a city.
       cities += (r.cities || []).length || (r.city ? 1 : 0);
+      (r.cities || []).forEach(function (city) { allCities[String(city.id)] = city; });
     });
   });
   var countedCodes = Object.keys(counted);
@@ -610,47 +681,41 @@
     root.classList.toggle('inset-left', (shape.c[0] - view.x) / view.w > 0.5);
     load('cn-' + shape.id).then(function (detail) {
       if (state.province !== shape.id) return;
-      var cityIds = {};
-      ((v && v.cities) || []).forEach(function (c) { cityIds[String(c.id)] = c.name; });
-      var whole = v && !Object.keys(cityIds).length;
+      var own = {}, partById = {}, marks = [];
+      ((v && v.cities) || []).forEach(function (c) { own[String(c.id)] = c; });
+      detail.parts.forEach(function (part) { partById[part.id] = part; });
+      var whole = v && !Object.keys(own).length;
+      // Boxes hold nearby places that belong to another province (Kinmen and
+      // Matsu, part of Fujian, beside Taiwan); a visit there is listed under
+      // that province but shaded here too.
+      (detail.frames || []).forEach(function (f) {
+        insetMap.appendChild(svg('rect', { x: f.x, y: f.y, width: f.w, height: f.h, rx: 4, class: 'atlas__frame' }));
+        var caption = svg('text', { x: f.x + 7, y: f.y + 15, class: 'atlas__frame-label' });
+        caption.textContent = f.label;
+        insetMap.appendChild(caption);
+        var note = svg('text', { x: f.x + 7, y: f.y + 27, class: 'atlas__frame-note' });
+        note.textContent = f.note;
+        insetMap.appendChild(note);
+      });
       detail.parts.forEach(function (part) {
-        var lit = whole || cityIds[part.id];
-        var p = svg('path', { d: part.d, class: 'atlas__part' + (lit ? ' is-visited' : '') });
+        var city = own[part.id] || (part.box && allCities[part.id]);
+        var p = svg('path', { d: part.d, class: 'atlas__part' + ((city || (whole && !part.box)) ? ' is-visited' : '') });
         var t = svg('title', {});
-        t.textContent = (cityIds[part.id] ? cityIds[part.id] + ' ' : '') + part.zh;
+        t.textContent = (city ? city.name + ' ' : '') + part.zh;
         p.appendChild(t);
         insetMap.appendChild(p);
+        if (part.box && !own[part.id] && allCities[part.id]) marks.push({ at: part.c, name: allCities[part.id].name, frame: frameOf(detail, part.id) });
       });
-      // Dots first, then labels placed where they do not overlap one another; a
-      // label that fits nowhere is left out (the list below names every city).
-      var placed = [], labels = [];
       ((v && v.cities) || []).forEach(function (city) {
-        var part = detail.parts.filter(function (x) { return x.id === String(city.id); })[0];
+        var part = partById[String(city.id)];
         var at = part ? part.c : (detail.projection && city.lat != null ? mercator(detail.projection, city.lng, city.lat) : null);
-        if (at) {
-          insetMap.appendChild(svg('circle', { cx: at[0], cy: at[1], r: 5, class: 'atlas__city' }));
-          labels.push({ at: at, name: city.name });
-        }
+        if (at) marks.push({ at: at, name: city.name, frame: part && part.box ? frameOf(detail, part.id) : null });
         var li = el('li', '', city.name);
         li.appendChild(el('span', '', part ? part.zh : (city.zh || '')));
         $('[data-inset-list]').appendChild(li);
       });
-      labels.forEach(function (l) {
-        var text = svg('text', { class: 'atlas__city-label' });
-        text.textContent = l.name;
-        insetMap.appendChild(text);
-        var w = text.getComputedTextLength ? text.getComputedTextLength() : l.name.length * 9;
-        var spots = [[8, 6], [-8 - w, 6], [-w / 2, -10], [-w / 2, 22]];
-        for (var i = 0; i < spots.length; i++) {
-          text.setAttribute('x', (l.at[0] + spots[i][0]).toFixed(1));
-          text.setAttribute('y', (l.at[1] + spots[i][1]).toFixed(1));
-          var bb = text.getBBox(), b = { x: bb.x - 1, y: bb.y, w: bb.width + 2, h: bb.height };
-          var inside = b.x >= 0 && b.y >= 0 && b.x + b.w <= detail.width && b.y + b.h <= detail.height;
-          var clear = placed.every(function (o) { return b.x >= o.x + o.w || o.x >= b.x + b.w || b.y >= o.y + o.h || o.y >= b.y + b.h; });
-          if (inside && clear) { placed.push(b); return; }
-        }
-        insetMap.removeChild(text);
-      });
+      marks.forEach(function (m) { insetMap.appendChild(svg('circle', { cx: m.at[0], cy: m.at[1], r: 5, class: 'atlas__city' })); });
+      placeLabels(marks, detail);
       var note = $('[data-inset-note]');
       if (!v) note.textContent = 'Not visited yet.';
       else if (v.home) note.textContent = 'Home — where I live and study.';

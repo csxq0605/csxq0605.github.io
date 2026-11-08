@@ -11,6 +11,8 @@ async function page(browser, width, opts = {}) {
   const ctx = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce', ...opts });
   // Keep the test offline: only the local site may load.
   await ctx.route('**/*', r => r.request().url().startsWith(base) ? r.continue() : r.abort());
+  // Real visitor numbers change daily; checks start from "nothing exported yet".
+  await ctx.route(base + '/assets/data/visitor-atlas.json', r => r.fulfill({ status: 404, body: '' }));
   const p = await ctx.newPage();
   p.errors = [];
   p.on('pageerror', e => p.errors.push(e.message));
@@ -172,7 +174,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     const crumbs = async () => (await p.locator('[data-crumbs]').innerText()).replace(/\s+/g, ' ').trim();
     const viewBox = async () => (await p.locator('[data-map]').getAttribute('viewBox')).split(' ').map(Number);
     await p.waitForSelector('[data-layer="world"] path');
-    assert.deepStrictEqual(await texts(p, '[data-metrics] dd'), ['16', '22 / 34', '77', '6.4%']);
+    assert.deepStrictEqual(await texts(p, '[data-metrics] dd'), ['16', '23 / 34', '82', '6.4%']);
     assert.strictEqual(await crumbs(), 'World');
     const worldView = await viewBox();
     // Kashmir is drawn uncoloured; the South China Sea dashed line is present.
@@ -183,7 +185,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     await p.keyboard.press('Enter');
     await p.waitForSelector('[data-layer="country"] .atlas__region');
     assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region').count(), 34);
-    assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region.is-visited').count(), 22);
+    assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region.is-visited').count(), 23);
     assert.strictEqual(await p.locator('[data-layer="country"] .atlas__region.is-home').count(), 1);
     assert.ok((await p.locator('[data-layer="country"] .atlas__dash').getAttribute('d')).length > 100);
     assert.strictEqual(await crumbs(), 'World › China');
@@ -209,13 +211,32 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     await p.waitForSelector('[data-inset-map] .atlas__part');
     assert.strictEqual(await p.locator('[data-inset-note]').textContent(), 'Visited.');
     assert.strictEqual(await p.locator('[data-inset-map] .atlas__part:not(.is-visited)').count(), 0);
-    // Taiwan's counties, including Matsu (Lienchiang), which is placed by coordinates.
+    // Taiwan: 18 counties and cities on the main map. Kinmen and Matsu belong to
+    // Fujian: listed there, and shaded in the two boxes beside Taiwan.
     await p.locator('.chip', { hasText: 'Taiwan' }).click();
-    await p.waitForFunction(() => document.querySelectorAll('[data-inset-list] li').length === 15);
-    assert.strictEqual(await p.locator('[data-inset-map] .atlas__city').count(), 15);
-    assert.strictEqual(await p.locator('[data-inset-map] .atlas__part.is-visited').count(), 14);
-    const matsu = await p.locator('[data-inset-map] .atlas__city').last().evaluate(c => [+c.getAttribute('cx'), +c.getAttribute('cy')]);
-    assert.ok(matsu[0] > 0 && matsu[0] < 400 && matsu[1] > 0 && matsu[1] < 300, 'Matsu inside the window');
+    await p.waitForFunction(() => document.querySelector('[data-inset-title]').textContent.startsWith('Taiwan') && document.querySelectorAll('[data-inset-list] li').length === 18);
+    assert.strictEqual(await p.locator('[data-inset-map] .atlas__frame').count(), 2);
+    assert.deepStrictEqual(await p.locator('[data-inset-map] .atlas__frame-label').allTextContents(), ['Matsu 马祖', 'Kinmen 金门']);
+    assert.deepStrictEqual(await p.locator('[data-inset-map] .atlas__frame-note').allTextContents(), ['Fujian 福建', 'Fujian 福建']);
+    assert.strictEqual(await p.locator('[data-inset-map] .atlas__city').count(), 20);
+    assert.strictEqual(await p.locator('[data-inset-map] .atlas__part.is-visited').count(), 20);
+    assert.deepStrictEqual(await p.locator('[data-inset-map] .atlas__part:not(.is-visited) title').allTextContents(), ['云林县', '宜兰县']);
+    assert.ok(!(await p.locator('[data-inset-list]').innerText()).includes('Kinmen'), 'Kinmen is listed under Fujian, not Taiwan');
+    // Names never overlap each other, a dot or a box, and Taipei always gets its name.
+    const geo = await p.locator('[data-inset-map]').evaluate(m => ({
+      names: [...m.querySelectorAll('.atlas__city-label')].map(t => { const b = t.getBBox(); return [t.textContent, b.x, b.y, b.width, b.height]; }),
+      frames: [...m.querySelectorAll('.atlas__frame')].map(r => [+r.getAttribute('x'), +r.getAttribute('y'), +r.getAttribute('width'), +r.getAttribute('height')]),
+    }));
+    const apart = (a, b) => a[0] + a[2] <= b[0] || b[0] + b[2] <= a[0] || a[1] + a[3] <= b[1] || b[1] + b[3] <= a[1];
+    for (const [i, a] of geo.names.entries()) for (const b of geo.names.slice(i + 1)) assert.ok(apart(a.slice(1), b.slice(1)), 'names overlap: ' + a[0] + ' / ' + b[0]);
+    for (const n of geo.names.filter(n => !['Kinmen', 'Matsu'].includes(n[0]))) for (const f of geo.frames) assert.ok(apart(n.slice(1), f), n[0] + ' sits on a box');
+    assert.ok(geo.names.length >= 17 && geo.names.some(n => n[0] === 'Taipei'), 'names placed: ' + geo.names.map(n => n[0]));
+    // Fujian lists Kinmen and Matsu as places, without shading Quanzhou or Fuzhou.
+    await p.locator('.chip', { hasText: 'Fujian' }).click();
+    await p.waitForFunction(() => document.querySelector('[data-inset-title]').textContent.startsWith('Fujian') && document.querySelectorAll('[data-inset-list] li').length === 2);
+    assert.deepStrictEqual(await p.locator('[data-inset-list] li').evaluateAll(ls => ls.map(l => l.firstChild.textContent)), ['Kinmen', 'Matsu']);
+    assert.strictEqual(await p.locator('[data-inset-map] .atlas__part.is-visited').count(), 0);
+    assert.strictEqual(await p.locator('[data-inset-map] .atlas__city').count(), 2);
     // Zoom buttons, then the breadcrumb back to the world.
     const before = await viewBox();
     await p.getByRole('button', { name: 'Zoom in' }).click();
@@ -275,7 +296,7 @@ const texts = async (p, sel) => p.locator(sel).allTextContents();
     assert.ok(await p.locator('[data-demo-badge]').isHidden());
     assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     assert.deepStrictEqual(p.errors, []);
-    console.log('PASS explore: world → China → Xinjiang cities, Esc and breadcrumb back, zoom, Tianjin and Taiwan windows, Japan prefectures, visitors tab');
+    console.log('PASS explore: world → China → Xinjiang cities, Esc and breadcrumb back, zoom, Tianjin, Taiwan and Fujian windows, Japan prefectures, visitors tab');
     await p.context().close();
   }
 

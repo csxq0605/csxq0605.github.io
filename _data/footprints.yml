@@ -72,6 +72,14 @@ countries:
         cities:
           - { id: "340100", name: Hefei }
           - { id: "341000", name: Huangshan }
+      # Kinmen and Matsu belong to Fujian in China's administrative divisions
+      # (Quanzhou's Jinmen County, Fuzhou's Lianjiang County). They are marked as
+      # places inside Fujian, and also shaded in the boxes beside Taiwan's map.
+      - id: "350000"
+        name: Fujian
+        cities:
+          - { id: "350527", name: Kinmen, zh: 金门县, lat: 24.44, lng: 118.37 }
+          - { id: matsu, name: Matsu, zh: 马祖列岛（连江县）, lat: 26.16, lng: 119.94 }
       - id: "370000"
         name: Shandong
         cities:
@@ -140,14 +148,17 @@ countries:
           - { id: TW-TNN, name: Tainan }
           - { id: TW-KHH, name: Kaohsiung }
           - { id: TW-KEE, name: Keelung }
-          - { id: TW-HSZ, name: Hsinchu }
+          - { id: TW-HSZ, name: Hsinchu City }
+          - { id: TW-HSQ, name: Hsinchu County }
+          - { id: TW-MIA, name: Miaoli }
+          - { id: TW-CHA, name: Changhua }
+          - { id: TW-CYI, name: Chiayi City }
+          - { id: TW-CYQ, name: Chiayi County }
           - { id: TW-NAN, name: Nantou }
           - { id: TW-PIF, name: Pingtung }
           - { id: TW-HUA, name: Hualien }
           - { id: TW-TTT, name: Taitung }
           - { id: TW-PEN, name: Penghu }
-          - { id: TW-KIN, name: Kinmen }
-          - { id: TW-LIE, name: Lienchiang, zh: 连江县, lat: 26.16, lng: 119.95 }
   - code: JP
     name: Japan
     regions:
