@@ -99,6 +99,57 @@ async function write(name, data) {
   return (await fs.stat(file)).size;
 }
 
+// Taiwan's detail map. Counties come from Natural Earth admin-1 (DataV has no
+// subdivisions for Taiwan); ids are ISO 3166-2 codes such as TW-TPE. The main
+// frame holds Taiwan island and Penghu. Kinmen and Matsu are, in China's
+// administrative divisions, part of Fujian (Quanzhou's Jinmen County and
+// Fuzhou's Lianjiang County); they sit next to Taiwan on most maps, so they get
+// two small boxes on the left, captioned as Fujian. Their shapes come from DataV.
+const TW_MAIN = [[118, 10], [392, 290]];
+const TW_BOXES = [
+  { id: 'matsu', label: 'Matsu', zh: '马祖', note: 'Fujian 福建', x: 8, y: 12, w: 100, h: 132 },
+  { id: '350527', label: 'Kinmen', zh: '金门', note: 'Fujian 福建', x: 8, y: 156, w: 100, h: 132 },
+];
+async function taiwanInset(p) {
+  const admin1 = await cached('ne_10m_admin_1_states_provinces.geojson', NE + 'ne_10m_admin_1_states_provinces.geojson');
+  const main = await shape({ type: 'FeatureCollection', features: admin1.features.filter(f => f.properties.adm0_a3 === 'TWN' && f.properties.iso_3166_2 !== 'TW-KIN') },
+    '-each "adcode = iso_3166_2; name = name_zh" -filter-fields adcode,name -simplify 60% keep-shapes');
+  const fp = geoMercator().fitExtent(TW_MAIN, main);
+  const mainPath = geoPath(fp).digits(1);
+  const parts = main.features.map(f => ({ id: String(f.properties.adcode), zh: f.properties.name, d: mainPath(f), c: mainPath.centroid(f).map(r) }));
+
+  // Matsu: the islands of DataV's Lianjiang County that lie offshore (east of the
+  // mainland coast, or south of 26.3°N), not the county's mainland part.
+  const lianjiang = await cached('datav_350122.json', DATAV + '350122.json');
+  const islands = [];
+  for (const f of lianjiang.features) {
+    const g = f.geometry;
+    for (const rings of g.type === 'Polygon' ? [g.coordinates] : g.coordinates) {
+      const poly = { type: 'Polygon', coordinates: JSON.parse(JSON.stringify(rings)) };
+      rewind({ geometry: poly });
+      if (geoArea(poly) * 6371 ** 2 > 500) continue;          // the mainland county
+      const [[x0, y0], [x1, y1]] = geoBounds(poly);
+      const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+      if ((cx >= 119.9 && cy <= 26.3 && cy >= 25.9) || cx >= 120.15) islands.push(poly.coordinates);
+    }
+  }
+  const matsu = { type: 'Feature', properties: {}, geometry: { type: 'MultiPolygon', coordinates: islands } };
+  const kinmenSrc = await cached('datav_350527.json', DATAV + '350527.json');
+  const kinmen = (await shape(kinmenSrc, '-simplify 60% keep-shapes')).features[0];
+  const frames = [];
+  for (const [box, feature, zh] of [[TW_BOXES[0], matsu, '马祖列岛（连江县）'], [TW_BOXES[1], kinmen, '金门县']]) {
+    const bp = geoMercator().fitExtent([[box.x + 10, box.y + 30], [box.x + box.w - 10, box.y + box.h - 10]], feature);
+    const path = geoPath(bp).digits(1);
+    parts.push({ id: box.id, zh, d: path(feature), c: path.centroid(feature).map(r), box: true });
+    frames.push({ id: box.id, x: box.x, y: box.y, w: box.w, h: box.h, label: box.label + ' ' + box.zh, note: box.note });
+  }
+  return {
+    id: p.id, name: p.name, zh: p.zh, width: INSET.width, height: INSET.height,
+    projection: { scale: fp.scale(), translate: fp.translate() },
+    parts, frames,
+  };
+}
+
 async function main() {
   await fs.mkdir(OUT, { recursive: true });
   const report = [];
@@ -217,23 +268,11 @@ async function main() {
   }
 
   // Province detail maps for the inset (one Mercator projection per province) --
-  // Taiwan's counties come from Natural Earth admin-1 (DataV has no subdivisions for
-  // it); ids are ISO 3166-2 codes such as TW-TPE. Natural Earth lacks Lienchiang
-  // (Matsu); places without a shape can be given lat / lng in footprints.yml.
   for (const p of cnFeatures) {
-    let parts;
-    if (p.id === '710000') {
-      parts = await shape({ type: 'FeatureCollection', features: admin1.features.filter(f => f.properties.adm0_a3 === 'TWN') },
-        '-each "adcode = iso_3166_2; name = name_zh" -filter-fields adcode,name -simplify 60% keep-shapes');
-    } else {
-      const src = await cached(`datav_${p.id}_full.json`, DATAV + `${p.id}_full.json`);
-      parts = await shape(src, '-filter-fields adcode,name -simplify 50% keep-shapes');
-    }
-    // Taiwan's frame also takes in Matsu (Lienchiang), which has no shape here.
-    const frame = p.id === '710000'
-      ? { type: 'FeatureCollection', features: [...parts.features, { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [119.95, 26.16] } }] }
-      : parts;
-    const fp = geoMercator().fitExtent([[INSET.pad, INSET.pad], [INSET.width - INSET.pad, INSET.height - INSET.pad]], frame);
+    if (p.id === '710000') { report.push(['cn-710000.json', await write('cn-710000.json', await taiwanInset(p))]); continue; }
+    const src = await cached(`datav_${p.id}_full.json`, DATAV + `${p.id}_full.json`);
+    const parts = await shape(src, '-filter-fields adcode,name -simplify 50% keep-shapes');
+    const fp = geoMercator().fitExtent([[INSET.pad, INSET.pad], [INSET.width - INSET.pad, INSET.height - INSET.pad]], parts);
     const inset = geoPath(fp).digits(1);
     report.push([`cn-${p.id}.json`, await write(`cn-${p.id}.json`, {
       id: p.id, name: p.name, zh: p.zh, width: INSET.width, height: INSET.height,
