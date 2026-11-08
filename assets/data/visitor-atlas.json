@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-07T14:16:16Z",
+ "updated_at": "2026-11-08T14:24:30Z",
  "period_start": "2026-10-26",
  "unlocated_visits": 0,
  "regions": [
@@ -15,6 +15,13 @@
    "name": "Japan",
    "lat": 36,
    "lng": 138,
+   "visits": 2
+  },
+  {
+   "code": "US",
+   "name": "United States",
+   "lat": 38,
+   "lng": -97,
    "visits": 2
   },
   {
