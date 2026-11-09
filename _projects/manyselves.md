@@ -3,8 +3,8 @@
 slug: manyselves
 title: "ManySelves"
 repo: csxq0605/manyselves
-source_commit: 8db32b4
-synced_at: 2026-11-02
+source_commit: b97aecd
+synced_at: 2026-11-09
 excerpt_separator: "<!-- no excerpt -->"
 ---
 {% raw %}
