@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-11T15:30:02Z",
+ "updated_at": "2026-11-12T16:06:35Z",
  "period_start": "2026-10-26",
  "unlocated_visits": 0,
  "regions": [
@@ -8,7 +8,7 @@
    "name": "Taiwan",
    "lat": 23.5,
    "lng": 121,
-   "visits": 7
+   "visits": 10
   },
   {
    "code": "JP",
@@ -22,6 +22,13 @@
    "name": "Singapore",
    "lat": 1.37,
    "lng": 103.8,
+   "visits": 2
+  },
+  {
+   "code": "GB",
+   "name": "United Kingdom",
+   "lat": 54,
+   "lng": -2,
    "visits": 2
   },
   {
