@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-13T15:34:36Z",
+ "updated_at": "2026-11-14T14:23:29Z",
  "period_start": "2026-10-26",
  "unlocated_visits": 0,
  "regions": [
@@ -15,7 +15,7 @@
    "name": "Japan",
    "lat": 36,
    "lng": 138,
-   "visits": 2
+   "visits": 4
   },
   {
    "code": "SG",
