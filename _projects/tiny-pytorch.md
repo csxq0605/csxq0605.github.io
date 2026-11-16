@@ -4,7 +4,7 @@ slug: tiny-pytorch
 title: "Tiny PyTorch"
 repo: csxq0605/pku-aiprogramming
 source_commit: 42a8cf9
-synced_at: 2026-11-09
+synced_at: 2026-11-16
 excerpt_separator: "<!-- no excerpt -->"
 ---
 {% raw %}

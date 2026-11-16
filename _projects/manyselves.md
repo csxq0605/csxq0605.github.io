@@ -4,7 +4,7 @@ slug: manyselves
 title: "ManySelves"
 repo: csxq0605/manyselves
 source_commit: b97aecd
-synced_at: 2026-11-09
+synced_at: 2026-11-16
 excerpt_separator: "<!-- no excerpt -->"
 ---
 {% raw %}

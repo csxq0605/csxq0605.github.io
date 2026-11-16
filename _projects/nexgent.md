@@ -3,8 +3,8 @@
 slug: nexgent
 title: "Nexgent"
 repo: csxq0605/Nexgent
-source_commit: 80d76b6
-synced_at: 2026-11-09
+source_commit: 86e0af4
+synced_at: 2026-11-16
 excerpt_separator: "<!-- no excerpt -->"
 ---
 {% raw %}
